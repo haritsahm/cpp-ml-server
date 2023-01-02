@@ -13,8 +13,9 @@ RUN apt-get -y update && \
     apt-get -y upgrade && \
     apt-get -y dist-upgrade && \
     apt-get -y autoremove && \
-    apt-get install -y build-essential gdb wget git libssl-dev clang-format cmake && \
+    apt-get install -y build-essential gdb wget git libssl-dev clang-format cmake curl && \
     apt-get install -y libperlio-gzip-perl libjson-perl libpq-dev libsqlite3-dev unzip && \
+    apt-get install -y zlib1g zlib1g-dev && \
     apt-get autoremove -y && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
@@ -46,8 +47,6 @@ RUN cd /temp/ && \
     cmake .. -DLIBASYIK_ENABLE_SOCI=OFF && \
     make -j$(nproc) && \
     make install
-
-RUN apt-get -y update && apt install -y zlib1g zlib1g-dev curl
 
 RUN cd /temp/ && \
     git clone https://github.com/Tencent/rapidjson.git && cd rapidjson/ && \
