@@ -2,33 +2,31 @@
 #define INFERENCE_ENGINE_HPP
 
 #include <string>
+#include <vector>
+#include <cstdint>
+#include "common.hpp"
 
-struct EngineConfig
-{
-    std::string output_name_{"output"};
-    std::string input_name_{"input"};
-    std::string input_datatype_;
-    std::string input_format_{"FORMAT_NCHW"};
-    int max_batch_size_{1};
-};
 
 class InferenceEngine
 {
 public:
     InferenceEngine() = default;
-    InferenceEngine(const EngineConfig &config)
-        : engine_config(config){};
+    InferenceEngine(const ModelConfig &config, const int &batch_size)
+        : model_config(config), batch_size(batch_size){};
     virtual ~InferenceEngine(){};
     InferenceEngine(const InferenceEngine &engine) = delete;
     InferenceEngine &operator=(InferenceEngine &engine);
     InferenceEngine(InferenceEngine &&engine) = delete;
     InferenceEngine &operator=(InferenceEngine &&engine);
 
-    void process();
-    virtual bool validate() = 0;
+    void process(const InferenceData &data);
+    virtual bool validate(const InferenceData &data) = 0;
 
 private:
-    EngineConfig engine_config{};
+    ModelConfig model_config{};
+    int batch_size{1};
+
+    // TODO: Tuple of error code and explenation in case of error.
 };
 
 #endif

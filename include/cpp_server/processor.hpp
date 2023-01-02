@@ -26,11 +26,8 @@ public:
     virtual InferenceResponse process(const std::string &ss) = 0;
 
 private:
-    TritonClient triton_client;
     ClientConfig client_config;
-    std::string model_name{""};
-    std::string model_version{""};
-    InferenceEngine infer_engine;
+    std::unique_ptr<InferenceEngine> infer_engine;
 };
 
 #endif
