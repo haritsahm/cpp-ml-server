@@ -7,8 +7,9 @@
 #include <opencv2/imgproc.hpp>
 #include "processor.hpp"
 #include "helper.hpp"
+#include "common.hpp"
 
-struct ImageModelInfo : ModelInfo
+struct ImageModelInfo : ModelConfig
 {
     // The shape of the input
     int input_c_{3};
