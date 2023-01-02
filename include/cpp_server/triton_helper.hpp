@@ -2,64 +2,10 @@
 #define HELPER_HPP
 
 #include <string>
+#include <vector>
+#include <http_client.h>
+#include <json_utils.h>
 #include <opencv2/core.hpp>
-
-static const std::string base64_chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789+/";
-
-static inline bool is_base64(unsigned char c)
-{
-    return (isalnum(c) || (c == '+') || (c == '/'));
-}
-
-std::string base64_decode(std::string const &encoded_string)
-{
-    int in_len = encoded_string.size();
-    int i = 0;
-    int j = 0;
-    int in_ = 0;
-    unsigned char char_array_4[4], char_array_3[3];
-    std::string ret;
-
-    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
-    {
-        char_array_4[i++] = encoded_string[in_];
-        in_++;
-        if (i == 4)
-        {
-            for (i = 0; i < 4; i++)
-                char_array_4[i] = base64_chars.find(char_array_4[i]);
-
-            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
-            for (i = 0; (i < 3); i++)
-                ret += char_array_3[i];
-            i = 0;
-        }
-    }
-
-    if (i)
-    {
-        for (j = i; j < 4; j++)
-            char_array_4[j] = 0;
-
-        for (j = 0; j < 4; j++)
-            char_array_4[j] = base64_chars.find(char_array_4[j]);
-
-        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
-        for (j = 0; (j < i - 1); j++)
-            ret += char_array_3[j];
-    }
-
-    return ret;
-}
 
 bool ParseType(const std::string &dtype, int *type1, int *type3)
 {
@@ -106,7 +52,7 @@ bool ParseType(const std::string &dtype, int *type1, int *type3)
     return true;
 }
 
-void ParseModelGrpc(
+bool ParseModelGrpc(
     const inference::ModelMetadataResponse &model_metadata,
     const inference::ModelConfigResponse &model_config, const size_t batch_size,
     ModelInfo *model_info)
@@ -115,21 +61,21 @@ void ParseModelGrpc(
     {
         std::cerr << "expecting 1 input, got " << model_metadata.inputs().size()
                   << std::endl;
-        exit(1);
+        return false
     }
 
     if (model_metadata.outputs().size() != 1)
     {
         std::cerr << "expecting 1 output, got " << model_metadata.outputs().size()
                   << std::endl;
-        exit(1);
+        return false
     }
 
     if (model_config.config().input().size() != 1)
     {
         std::cerr << "expecting 1 input in model configuration, got "
                   << model_config.config().input().size() << std::endl;
-        exit(1);
+        return false
     }
 
     auto input_metadata = model_metadata.inputs(0);
@@ -141,7 +87,7 @@ void ParseModelGrpc(
         std::cerr << "expecting output datatype to be FP32, model '"
                   << model_metadata.name() << "' output type is '"
                   << output_metadata.datatype() << "'" << std::endl;
-        exit(1);
+        return false
     }
 
     model_info->max_batch_size_ = model_config.config().max_batch_size();
@@ -156,7 +102,7 @@ void ParseModelGrpc(
         {
             std::cerr << "batching not supported for model \""
                       << model_metadata.name() << "\"" << std::endl;
-            exit(1);
+            return false
         }
     }
     else
@@ -166,7 +112,7 @@ void ParseModelGrpc(
         {
             std::cerr << "expecting batch size <= " << model_info->max_batch_size_
                       << " for model '" << model_metadata.name() << "'" << std::endl;
-            exit(1);
+            return false
         }
     }
 
@@ -185,7 +131,7 @@ void ParseModelGrpc(
         {
             std::cerr << "variable-size dimension in model output not supported"
                       << std::endl;
-            exit(1);
+            return false
         }
         else if (dim > 1)
         {
@@ -193,7 +139,7 @@ void ParseModelGrpc(
             if (non_one_cnt > 1)
             {
                 std::cerr << "expecting model output to be a vector" << std::endl;
-                exit(1);
+                return false
             }
         }
     }
@@ -207,7 +153,7 @@ void ParseModelGrpc(
         std::cerr << "expecting input to have " << expected_input_dims
                   << " dimensions, model '" << model_metadata.name()
                   << "' input has " << input_metadata.shape().size() << std::endl;
-        exit(1);
+        return false
     }
 
     if ((input_config.format() != inference::ModelInput::FORMAT_NCHW) &&
@@ -221,7 +167,7 @@ void ParseModelGrpc(
             << " or "
             << inference::ModelInput_Format_Name(inference::ModelInput::FORMAT_NCHW)
             << std::endl;
-        exit(1);
+        return false
     }
 
     model_info->output_name_ = output_metadata.name();
@@ -249,11 +195,13 @@ void ParseModelGrpc(
     {
         std::cerr << "unexpected input datatype '" << model_info->input_datatype_
                   << "' for model \"" << model_metadata.name() << std::endl;
-        exit(1);
+        return false
     }
+
+    return true;
 }
 
-void ParseModelHttp(
+bool ParseModelHttp(
     const rapidjson::Document &model_metadata,
     const rapidjson::Document &model_config, const size_t batch_size,
     ModelInfo *model_info)
@@ -267,7 +215,7 @@ void ParseModelHttp(
     if (input_count != 1)
     {
         std::cerr << "expecting 1 input, got " << input_count << std::endl;
-        exit(1);
+        return false
     }
 
     const auto &output_itr = model_metadata.FindMember("outputs");
@@ -279,7 +227,7 @@ void ParseModelHttp(
     if (output_count != 1)
     {
         std::cerr << "expecting 1 output, got " << output_count << std::endl;
-        exit(1);
+        return false
     }
 
     const auto &input_config_itr = model_config.FindMember("input");
@@ -292,7 +240,7 @@ void ParseModelHttp(
     {
         std::cerr << "expecting 1 input in model configuration, got " << input_count
                   << std::endl;
-        exit(1);
+        return false
     }
 
     const auto &input_metadata = *input_itr->value.Begin();
@@ -304,7 +252,7 @@ void ParseModelHttp(
     {
         std::cerr << "output missing datatype in the metadata for model'"
                   << model_metadata["name"].GetString() << "'" << std::endl;
-        exit(1);
+        return false
     }
     auto datatype = std::string(
         output_dtype_itr->value.GetString(),
@@ -314,7 +262,7 @@ void ParseModelHttp(
         std::cerr << "expecting output datatype to be FP32, model '"
                   << model_metadata["name"].GetString() << "' output type is '"
                   << datatype << "'" << std::endl;
-        exit(1);
+        return false
     }
 
     int max_batch_size = 0;
@@ -335,7 +283,7 @@ void ParseModelHttp(
         {
             std::cerr << "batching not supported for model '"
                       << model_metadata["name"].GetString() << "'" << std::endl;
-            exit(1);
+            return false
         }
     }
     else
@@ -346,7 +294,7 @@ void ParseModelHttp(
             std::cerr << "expecting batch size <= " << max_batch_size
                       << " for model '" << model_metadata["name"].GetString() << "'"
                       << std::endl;
-            exit(1);
+            return false
         }
     }
 
@@ -369,7 +317,7 @@ void ParseModelHttp(
             {
                 std::cerr << "variable-size dimension in model output not supported"
                           << std::endl;
-                exit(1);
+                return false
             }
             else if (shape_json[i].GetInt() > 1)
             {
@@ -377,7 +325,7 @@ void ParseModelHttp(
                 if (non_one_cnt > 1)
                 {
                     std::cerr << "expecting model output to be a vector" << std::endl;
-                    exit(1);
+                    return false
                 }
             }
         }
@@ -386,7 +334,7 @@ void ParseModelHttp(
     {
         std::cerr << "output missing shape in the metadata for model'"
                   << model_metadata["name"].GetString() << "'" << std::endl;
-        exit(1);
+        return false
     }
 
     // Model input must have 3 dims, either CHW or HWC (not counting the
@@ -401,14 +349,14 @@ void ParseModelHttp(
             std::cerr << "expecting input to have " << expected_input_dims
                       << " dimensions, model '" << model_metadata["name"].GetString()
                       << "' input has " << input_shape_itr->value.Size() << std::endl;
-            exit(1);
+            return false
         }
     }
     else
     {
         std::cerr << "input missing shape in the metadata for model'"
                   << model_metadata["name"].GetString() << "'" << std::endl;
-        exit(1);
+        return false
     }
 
     model_info->input_format_ = std::string(
@@ -419,7 +367,7 @@ void ParseModelHttp(
     {
         std::cerr << "unexpected input format " << model_info->input_format_
                   << ", expecting FORMAT_NCHW or FORMAT_NHWC" << std::endl;
-        exit(1);
+        return false
     }
 
     model_info->output_name_ = std::string(
@@ -458,8 +406,10 @@ void ParseModelHttp(
         std::cerr << "unexpected input datatype '" << model_info->input_datatype_
                   << "' for model \"" << model_metadata["name"].GetString()
                   << std::endl;
-        exit(1);
+        return false
     }
+
+    return true;
 }
 
 #endif
