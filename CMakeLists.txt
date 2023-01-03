@@ -10,6 +10,8 @@ endif()
 
 find_package(libasyik REQUIRED)
 find_package(Boost COMPONENTS context fiber date_time REQUIRED)
+find_package(RapidJSON REQUIRED)
+find_package(Protobuf REQUIRED)
 find_package(TritonCommon REQUIRED PATHS /usr/local/lib/cmake/TritonCommon)
 find_package(TritonClient REQUIRED PATHS /usr/local/lib/cmake/TritonClient)
 find_package(OpenCV 4 REQUIRED)
@@ -18,16 +20,30 @@ include_directories(
     include
 )
 
-add_executable(${PROJECT_NAME} main.cpp) # add more source code here
+add_executable(${PROJECT_NAME} main.cpp src/triton_engine.cpp) # add more source code here
 
 if(libasyik_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${libasyik_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} libasyik)
 endif()
 
+if(RapidJSON_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${RapidJSON_INCLUDE_DIRS})
+endif()
+
+if(Protobuf_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Protobuf_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES})
+endif()
+
 if(TritonClient_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} TritonClient::httpclient TritonCommon::triton-common-json)
+    target_link_libraries(${PROJECT_NAME} TritonClient::httpclient TritonClient::grpcclient)
+endif()
+
+if(TritonCommon_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${TritonCommon_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} TritonCommon::triton-common-model-config TritonCommon::triton-common-json)
 endif()
 
 if(Boost_FOUND)
