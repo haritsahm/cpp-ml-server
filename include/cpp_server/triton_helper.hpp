@@ -9,6 +9,7 @@
 #include <rapidjson/document.h>
 #include <triton/common/model_config.h>
 #include <opencv2/core.hpp>
+#include "common.hpp"
 
 namespace tc = triton::client;
 
@@ -43,7 +44,7 @@ struct ClientConfig
 bool ParseModelGrpc(
     const inference::ModelMetadataResponse &model_metadata,
     const inference::ModelConfigResponse &model_config, const size_t &batch_size,
-    ModelConfig *model_info)
+    cpp_server::ModelConfig *model_info)
 {
     if (model_metadata.inputs().size() != 1)
     {
@@ -151,7 +152,7 @@ bool ParseModelGrpc(
 bool ParseModelHttp(
     const rapidjson::Document &model_metadata,
     const rapidjson::Document &model_config, const size_t &batch_size,
-    ModelConfig *model_info)
+    cpp_server::ModelConfig *model_info)
 {
     const auto &input_itr = model_metadata.FindMember("inputs");
     size_t input_count = 0;

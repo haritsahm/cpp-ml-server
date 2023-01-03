@@ -5,26 +5,32 @@
 #include <vector>
 #include <cstdint>
 #include "common.hpp"
+#include "error.hpp"
 
-class InferenceEngine
+namespace cpp_server
 {
-public:
-    InferenceEngine() = default;
-    InferenceEngine(const ModelConfig &config, const int &batch_size)
-        : model_config(config), batch_size(batch_size){};
-    virtual ~InferenceEngine(){};
-    InferenceEngine(const InferenceEngine &engine) = delete;
-    InferenceEngine &operator=(InferenceEngine &engine);
-    InferenceEngine(InferenceEngine &&engine) = delete;
-    InferenceEngine &operator=(InferenceEngine &&engine);
+    class InferenceEngine
+    {
+    public:
+        InferenceEngine() = default;
+        InferenceEngine(const ModelConfig &config, const int &batch_size)
+            : model_config(config), batch_size(batch_size){};
+        virtual ~InferenceEngine(){};
+        InferenceEngine(const InferenceEngine &engine) = delete;
+        InferenceEngine &operator=(InferenceEngine &engine);
+        InferenceEngine(InferenceEngine &&engine) = delete;
+        InferenceEngine &operator=(InferenceEngine &&engine);
 
-    virtual void process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results) = 0;
+        virtual Error process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results) = 0;
+        bool isOk() { return status; }
 
-protected:
-    ModelConfig model_config{};
-    int batch_size{1};
+    protected:
+        ModelConfig model_config{};
+        int batch_size{1};
+        bool status{false};
 
-    // TODO: Tuple of error code and explenation in case of error.
+        // TODO: Tuple of error code and explenation in case of error.
+    };
 };
 
 #endif

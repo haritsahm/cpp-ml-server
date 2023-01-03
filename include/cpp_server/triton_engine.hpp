@@ -10,57 +10,59 @@
 #include "inference_engine.hpp"
 #include "common.hpp"
 #include "triton_helper.hpp"
+#include "error.h"
 
-class TritonEngine : public InferenceEngine
+namespace cpp_server
 {
-public:
-    TritonEngine() = default;
-    TritonEngine(const ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
-    ~TritonEngine()
+    class TritonEngine : public InferenceEngine
     {
-        for (auto p : infer_inputs)
+    public:
+        TritonEngine() = default;
+        TritonEngine(const ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
+        ~TritonEngine()
         {
-            delete p;
-        }
-        infer_inputs.clear();
+            for (auto p : infer_inputs)
+            {
+                delete p;
+            }
+            infer_inputs.clear();
 
-        for (auto p : infer_outputs)
-        {
-            delete p;
-        }
-        infer_inputs.clear();
+            for (auto p : infer_outputs)
+            {
+                delete p;
+            }
+            infer_inputs.clear();
+        };
+        TritonEngine(const TritonEngine &engine) = delete;
+        TritonEngine &operator=(const TritonEngine &engine);
+        TritonEngine(TritonEngine &&engine) = delete;
+        TritonEngine &operator=(TritonEngine &&engine);
+
+        Error process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results);
+
+    private:
+        rapidjson::Document model_metadata_json;
+        rapidjson::Document model_config_json;
+
+        ClientConfig client_config{};
+        ModelConfig model_config{};
+        TritonClient triton_client;
+
+        std::shared_ptr<tc::InferInput> input_ptr;
+        std::shared_ptr<tc::InferRequestedOutput> output_ptr;
+        std::vector<tc::InferInput *> infer_inputs;                  // TODO: Destructor cleanup
+        std::vector<const tc::InferRequestedOutput *> infer_outputs; // TODO: Destructor cleanup
+        tc::InferOptions infer_options{""};
+
+        std::mutex mtx;
+        std::condition_variable cv;
+
+        Error readModelConfig();
+        Error initializeMemory();
+        Error validate(const std::vector<InferenceData<uint8_t>> &infer_data);
+        Error postprocess(const std::unique_ptr<tc::InferResult> &result, InferenceResult<uint8_t> &res,
+                          const size_t &batch_size, const std::string &output_name);
     };
-    TritonEngine(const TritonEngine &engine) = delete;
-    TritonEngine &operator=(const TritonEngine &engine);
-    TritonEngine(TritonEngine &&engine) = delete;
-    TritonEngine &operator=(TritonEngine &&engine);
-
-    void process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results);
-    bool isOk() { return status; }
-
-private:
-    bool status{false};
-    rapidjson::Document model_metadata_json;
-    rapidjson::Document model_config_json;
-
-    ClientConfig client_config{};
-    ModelConfig model_config{};
-    TritonClient triton_client;
-
-    std::shared_ptr<tc::InferInput> input_ptr;
-    std::shared_ptr<tc::InferRequestedOutput> output_ptr;
-    std::vector<tc::InferInput *> infer_inputs;                  // TODO: Destructor cleanup
-    std::vector<const tc::InferRequestedOutput *> infer_outputs; // TODO: Destructor cleanup
-    tc::InferOptions infer_options{""};
-
-    std::mutex mtx;
-    std::condition_variable cv;
-
-    void readModelConfig();
-    void initializeMemory();
-    bool validate(const std::vector<InferenceData<uint8_t>> &infer_data);
-    InferenceResult<uint8_t> postprocess(const std::unique_ptr<tc::InferResult> &result, const size_t &batch_size,
-                                         const std::string &output_name);
 };
 
 #endif
