@@ -63,11 +63,11 @@ RUN cd /temp/ && \
 
 RUN cd /temp/ && \
     git clone https://github.com/triton-inference-server/client.git && cd client/ && \
-    git checkout r22.04 && \
+    git checkout r22.06 && \
     mkdir build && cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DTRITON_ENABLE_CC_HTTP=ON  -DTRITON_ENABLE_CC_GRPC=ON \
-    -DTRITON_COMMON_REPO_TAG=r22.04 -DTRITON_THIRD_PARTY_REPO_TAG=r22.04 -DTRITON_CORE_REPO_TAG=r22.04 \
-    -DTRITON_BACKEND_REPO_TAG=r22.04 .. && \
+    -DTRITON_COMMON_REPO_TAG=r22.06 -DTRITON_THIRD_PARTY_REPO_TAG=r22.06 -DTRITON_CORE_REPO_TAG=r22.06 \
+    -DTRITON_BACKEND_REPO_TAG=r22.06 .. && \
     make -j$(nproc) cc-clients
 
 # Cleanup
