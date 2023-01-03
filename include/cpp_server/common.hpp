@@ -11,20 +11,31 @@ struct ModelConfig
     std::string input_datatype_{"FP32"};
     std::string output_datatype_{"FP32"};
     std::string input_format_{"FORMAT_NCHW"};
-    std::vector<int> input_shape_{};
-    std::vector<int> output_shape_{};
+    std::vector<int64_t> input_shape_;
+    std::vector<int64_t> output_shape_;
     int input_byte_size_{};
     int output_byte_size_{};
     int max_batch_size_{0};
+    bool channel_first_{true};
 };
 
-struct InferenceData {
-    std::vector<std::vector>> data;
+template <typename T>
+struct InferenceData
+{
+    std::vector<T> data;
+    std::string name;
     std::string data_dtype;
     std::vector<int> shape;
 };
 
-struct InferenceResult {
+template <typename T>
+struct InferenceResult
+{
+    std::vector<T> data;
+    std::string data_dtype;
+    std::vector<int64_t> shape;
+    std::string name;
+    size_t byte_size;
     bool status;
 };
 
@@ -84,6 +95,5 @@ std::string base64_decode(std::string const &encoded_string)
 
     return ret;
 }
-
 
 #endif
