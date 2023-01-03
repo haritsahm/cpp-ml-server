@@ -20,7 +20,7 @@ include_directories(
     include
 )
 
-add_executable(${PROJECT_NAME} main.cpp src/triton_engine.cpp) # add more source code here
+add_executable(${PROJECT_NAME} main.cpp src/triton_engine.cpp src/error.cpp) # add more source code here
 
 if(libasyik_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${libasyik_INCLUDE_DIR})
