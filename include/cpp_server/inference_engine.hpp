@@ -6,7 +6,6 @@
 #include <cstdint>
 #include "common.hpp"
 
-
 class InferenceEngine
 {
 public:
@@ -19,10 +18,9 @@ public:
     InferenceEngine(InferenceEngine &&engine) = delete;
     InferenceEngine &operator=(InferenceEngine &&engine);
 
-    void process(const InferenceData &data);
-    virtual bool validate(const InferenceData &data) = 0;
+    virtual void process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results) = 0;
 
-private:
+protected:
     ModelConfig model_config{};
     int batch_size{1};
 
