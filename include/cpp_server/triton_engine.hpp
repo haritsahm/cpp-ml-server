@@ -2,42 +2,41 @@
 #define TRITON_ENGINE_HPP
 
 #include <string>
+#include <memory>
+#include <cstdint>
 #include <http_client.h>
-#include <json_utils.h>
+#include "json_utils.h"
+#include <rapidjson/document.h>
 #include "inference_engine.hpp"
 #include "common.hpp"
-
-namespace tc = triton::client;
-
-enum ProtocolType
-{
-    HTTP = 0,
-    GRPC = 1
-};
-
-struct ClientConfig
-{
-    std::string model_name;
-    std::string model_version{""};
-    std::string url("localhost:8000");
-    ProtocolType protocol = ProtocolType::HTTP;
-    tc::Headers http_headers;
-}
+#include "triton_helper.hpp"
 
 class TritonEngine : public InferenceEngine
 {
 public:
     TritonEngine() = default;
     TritonEngine(const ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
-    ~TritonEngine(){};
+    ~TritonEngine()
+    {
+        for (auto p : infer_inputs)
+        {
+            delete p;
+        }
+        infer_inputs.clear();
+
+        for (auto p : infer_outputs)
+        {
+            delete p;
+        }
+        infer_inputs.clear();
+    };
     TritonEngine(const TritonEngine &engine) = delete;
     TritonEngine &operator=(const TritonEngine &engine);
     TritonEngine(TritonEngine &&engine) = delete;
     TritonEngine &operator=(TritonEngine &&engine);
 
-    void process(const InferenceData &data);
-    bool validate(const InferenceData &data);
-    bool isOk() {return status;}
+    void process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results);
+    bool isOk() { return status; }
 
 private:
     bool status{false};
@@ -48,7 +47,20 @@ private:
     ModelConfig model_config{};
     TritonClient triton_client;
 
+    std::shared_ptr<tc::InferInput> input_ptr;
+    std::shared_ptr<tc::InferRequestedOutput> output_ptr;
+    std::vector<tc::InferInput *> infer_inputs;                  // TODO: Destructor cleanup
+    std::vector<const tc::InferRequestedOutput *> infer_outputs; // TODO: Destructor cleanup
+    tc::InferOptions infer_options{""};
+
+    std::mutex mtx;
+    std::condition_variable cv;
+
     void readModelConfig();
-}
+    void initializeMemory();
+    bool validate(const std::vector<InferenceData<uint8_t>> &infer_data);
+    InferenceResult<uint8_t> postprocess(const std::unique_ptr<tc::InferResult> &result, const size_t &batch_size,
+                                         const std::string &output_name);
+};
 
 #endif
