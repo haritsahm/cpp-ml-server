@@ -34,6 +34,7 @@ public:
     cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result);
 
 private:
+    cpp_server::ModelConfig model_config;
     cpp_server::Error preprocess_data(const std::string &ss, cv::Mat &output);
 };
 
