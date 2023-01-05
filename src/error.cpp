@@ -49,6 +49,12 @@ namespace cpp_server
             return "Unknown";
         case Error::Code::INTERNAL:
             return "Internal";
+        case Error::Code::INVALID_DATA:
+            return "INVALID_DATA";
+        case Error::Code::VALIDATION_ERROR:
+            return "VALIDATION_ERROR";
+        case Error::Code::INFERENCE_ERROR:
+            return "INFERENCE_ERROR";
         case Error::Code::UNAVAILABLE:
             return "Unavailable";
         case Error::Code::UNSUPPORTED:
