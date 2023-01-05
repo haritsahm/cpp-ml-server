@@ -3,12 +3,25 @@
 #include <iostream>
 #include <typeinfo>
 #include <string>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 
-uint16_t validate_headers(const auto &headers)
-{
-  if (headers["Content-Type"] != "application/json")
+uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc) {
+
+  uint16_t err_code = 200;
+  if (req_ptr->headers["Content-Type"] != "application/json")
   {
+    LOG(ERROR) << "Content type error: payload must be defined as application/json" << "\n";
     return 415;
+  }
+  if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError()) {
+    LOG(ERROR) << "JSON parse error: " << doc.GetParseError() << " - " << rapidjson::GetParseError_En(doc.GetParseError()) << "\n";
+    return 500;
+  }
+
+  if (!doc.HasMember("image")){
+    LOG(ERROR) << "Data validation error: Image is not available in data" << "\n";
+    return 422;
   }
   return 200;
 }
@@ -22,7 +35,8 @@ int main()
   server->on_http_request("/name/<string>", "POST", [](auto req, auto args)
                           {
                             uint16_t r_errcode = 200;
-                            r_errcode = validate_headers(req->headers);
+                            rapidjson::Document payload_data;
+                            r_errcode = validate_requests(req, payload_data);
                             if (r_errcode != 200)
                             {
                               req->response.result(r_errcode);
