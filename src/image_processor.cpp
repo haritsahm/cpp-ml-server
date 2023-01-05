@@ -8,9 +8,25 @@ cpp_server::Error ImageProcessor::process(const rapidjson::Document &data, rapid
     cv::Mat preprocessed;
     cpp_server::Error p_err;
     p_err = preprocess_data(data["image"].GetString(), preprocessed);
-    if (!p_err.IsOk()) {
+    if (!p_err.IsOk())
+    {
         return p_err;
     }
+    std::vector<float> array_float;
+    if (preprocessed.isContinuous())
+    {
+        // array.assign((float*)mat.datastart, (float*)mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
+        array_float.assign((float *)preprocessed.data, (float *)preprocessed.data + preprocessed.total() * preprocessed.channels());
+    }
+    else
+    {
+        for (int i = 0; i < preprocessed.rows; ++i)
+        {
+            array_float.insert(array_float.end(), preprocessed.ptr<float>(i), preprocessed.ptr<float>(i) + preprocessed.cols * preprocessed.channels());
+        }
+    }
+    std::vector<uint8_t> array_uint8 = cpp_server::vectorT_to_blob<float>(array_float);
+
     // TODO: inference process
 
     // TODO: postprocess

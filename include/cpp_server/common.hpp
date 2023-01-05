@@ -1,6 +1,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include <vector>
+
 namespace cpp_server
 {
     struct ModelConfig
@@ -37,6 +39,14 @@ namespace cpp_server
         size_t byte_size;
         bool status;
     };
+
+    template <typename T>
+    static std::vector<unsigned char> vectorT_to_blob(std::vector<T> &dataT)
+    {
+        const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&dataT[0]);
+        std::vector<unsigned char> result(bytes, bytes + sizeof(T) * dataT.size());
+        return result;
+    }
 
 };
 
