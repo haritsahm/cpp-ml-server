@@ -2,9 +2,14 @@
 #include <libasyik/http.hpp>
 #include <iostream>
 #include <typeinfo>
+#include <memory>
 #include <string>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include "cpp_server/error.hpp"
+#include "cpp_server/image_processor.hpp"
 
 uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc) {
 
@@ -30,12 +35,24 @@ int main()
 {
   auto as = asyik::make_service();
   auto server = asyik::make_http_server(as, "127.0.0.1", 8080);
+  server->set_request_body_limit(10485760); // 10MB
+
+  ImageProcessor image_processor;
+  rapidjson::StringBuffer buffer;
+
+  // buffer.Clear();
+
+  rapidjson::Document payload_data, payload_result;
+
+  // rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  // payload_result.Accept(writer);
+
 
   // accept string argument
-  server->on_http_request("/name/<string>", "POST", [](auto req, auto args)
+  server->on_http_request("/name/<string>", "POST", [&image_processor, &payload_data, &payload_result](auto req, auto args)
                           {
                             uint16_t r_errcode = 200;
-                            rapidjson::Document payload_data;
+                            
                             r_errcode = validate_requests(req, payload_data);
                             if (r_errcode != 200)
                             {
@@ -43,12 +60,28 @@ int main()
                             }
                             else
                             {
-                              req->response.body = "{\"value\":\"Hello " + args[1] + "!\"}";
-                              LOG(INFO) << "X-Asyik=" << req->headers["x-asyik"] << "\n";
-                              LOG(INFO) << "Body=" << req->body << " type: " <<  typeid(req->body).name() <<"\n";
-                              // Body={"name": "harit", "data": ["key", "bb", "image"]} type: NSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
-                              req->response.headers.set("Content-Type", "text/json");
-                              req->response.result(200);
+                              cpp_server::Error proc_code = image_processor.process(payload_data, payload_result);
+                              if (!proc_code.IsOk()) {
+                                req->response.result(422);
+                                req->response.body = proc_code.AsString();
+                              }
+                              else {
+                                if (payload_result.HasMember("/class")) {
+                                    LOG(INFO) << "/class" << ":" << payload_result["/class"].GetString()<< "\n";
+                                }
+                                else {
+                                    LOG(INFO) << "Missing /class" << "\n";
+                                }
+
+                                // std::string output =  std::string(buffer.GetString(), buffer.GetSize());
+                                // req->response.body =output;
+                                // buffer.Clear();
+                                // LOG(INFO) << "X-Asyik=" << req->headers["x-asyik"] << "\n";
+                                // LOG(INFO) << "Body=" << output << " type: " <<  typeid(output).name() <<"\n";
+                                // Body={"name": "harit", "data": ["key", "bb", "image"]} type: NSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+                                req->response.headers.set("Content-Type", "application/json");
+                                req->response.result(200);
+                              }
                             } }); // other standard headers like content-length is set by library
 
   as->run();

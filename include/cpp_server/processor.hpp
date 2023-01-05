@@ -3,8 +3,9 @@
 
 #include <string>
 #include <memory>
+#include <rapidjson/document.h>
+#include "error.hpp"
 #include "inference_engine.hpp"
-#include "common.hpp"
 
 struct InferenceResponse
 {
@@ -21,13 +22,13 @@ public:
     Processor(const Processor &processor) = delete;
     Processor &operator=(const Processor &processor);
 
-    Processor(Processor &&processor) = delete;
+    Processor(Processor &&processor) = default;
     Processor &operator=(Processor &&processor);
 
-    virtual InferenceResponse process(const std::string &ss) = 0;
+    virtual cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result) = 0;
 
 private:
-    std::unique_ptr<InferenceEngine> infer_engine;
+    std::unique_ptr<cpp_server::InferenceEngine> infer_engine;
 };
 
 #endif

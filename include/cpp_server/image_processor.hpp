@@ -5,41 +5,39 @@
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include "processor.hpp"
-#include "helper.hpp"
+#include <opencv2/imgcodecs.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/pointer.h>
 #include "common.hpp"
+#include "base64_decoder.hpp"
+#include "processor.hpp"
+#include "error.hpp"
 
-struct ImageModelInfo : ModelConfig
+struct ImageModelInfo : cpp_server::ModelConfig
 {
     // The shape of the input
     int input_c_{3};
     int input_h_{384};
     int input_w_{384};
 
-    // The format of the input
-    int type1_{cv::8UC1};
-    int type3_{cv::8UC3};
-
-}
+};
 
 class ImageProcessor : public Processor
 {
 public:
     ImageProcessor() = default;
-    ImageProcessor(ClientConfig &config)
-        : Processor(config){};
     ~ImageProcessor(){};
 
     ImageProcessor(const ImageProcessor &base) = delete;
     ImageProcessor &operator=(const ImageProcessor &server);
 
-    ImageProcessor(ImageProcessor &&server) = delete;
+    ImageProcessor(ImageProcessor &&server) = default;
     ImageProcessor &operator=(ImageProcessor &&server);
 
-    InferenceResponse process(const std::string &ss);
+    cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result);
 
 private:
-    cv::Mat preprocess_data(const std::string &ss);
+    cpp_server::Error preprocess_data(const std::string &ss, cv::Mat &output);
 };
 
 #endif
