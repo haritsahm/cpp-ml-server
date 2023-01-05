@@ -11,21 +11,26 @@
 #include "cpp_server/error.hpp"
 #include "cpp_server/image_processor.hpp"
 
-uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc) {
+uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc)
+{
 
   uint16_t err_code = 200;
   if (req_ptr->headers["Content-Type"] != "application/json")
   {
-    LOG(ERROR) << "Content type error: payload must be defined as application/json" << "\n";
+    LOG(ERROR) << "Content type error: payload must be defined as application/json"
+               << "\n";
     return 415;
   }
-  if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError()) {
+  if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError())
+  {
     LOG(ERROR) << "JSON parse error: " << doc.GetParseError() << " - " << rapidjson::GetParseError_En(doc.GetParseError()) << "\n";
     return 500;
   }
 
-  if (!doc.HasMember("image")){
-    LOG(ERROR) << "Data validation error: Image is not available in data" << "\n";
+  if (!doc.HasMember("image"))
+  {
+    LOG(ERROR) << "Data validation error: Image is not available in data"
+               << "\n";
     return 422;
   }
   return 200;
@@ -38,21 +43,13 @@ int main()
   server->set_request_body_limit(10485760); // 10MB
 
   ImageProcessor image_processor;
-  rapidjson::StringBuffer buffer;
-
-  // buffer.Clear();
 
   rapidjson::Document payload_data, payload_result;
-
-  // rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  // payload_result.Accept(writer);
-
 
   // accept string argument
   server->on_http_request("/name/<string>", "POST", [&image_processor, &payload_data, &payload_result](auto req, auto args)
                           {
                             uint16_t r_errcode = 200;
-                            
                             r_errcode = validate_requests(req, payload_data);
                             if (r_errcode != 200)
                             {
@@ -61,24 +58,16 @@ int main()
                             else
                             {
                               cpp_server::Error proc_code = image_processor.process(payload_data, payload_result);
+                              rapidjson::StringBuffer buffer; buffer.Clear();
+                              rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                              payload_result.Accept(writer);
+
                               if (!proc_code.IsOk()) {
                                 req->response.result(422);
                                 req->response.body = proc_code.AsString();
                               }
                               else {
-                                if (payload_result.HasMember("/class")) {
-                                    LOG(INFO) << "/class" << ":" << payload_result["/class"].GetString()<< "\n";
-                                }
-                                else {
-                                    LOG(INFO) << "Missing /class" << "\n";
-                                }
-
-                                // std::string output =  std::string(buffer.GetString(), buffer.GetSize());
-                                // req->response.body =output;
-                                // buffer.Clear();
-                                // LOG(INFO) << "X-Asyik=" << req->headers["x-asyik"] << "\n";
-                                // LOG(INFO) << "Body=" << output << " type: " <<  typeid(output).name() <<"\n";
-                                // Body={"name": "harit", "data": ["key", "bb", "image"]} type: NSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+                                req->response.body = buffer.GetString();
                                 req->response.headers.set("Content-Type", "application/json");
                                 req->response.result(200);
                               }
