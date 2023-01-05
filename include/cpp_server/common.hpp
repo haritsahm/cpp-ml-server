@@ -1,5 +1,5 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#ifndef COMMON_HELPER_HPP
+#define COMMON_HELPER_HPP
 
 #include <vector>
 

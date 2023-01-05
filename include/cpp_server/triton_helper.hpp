@@ -1,11 +1,10 @@
-#ifndef HELPER_HPP
-#define HELPER_HPP
+#ifndef TRITON_HELPER_HPP
+#define TRITON_HELPER_HPP
 
 #include <string>
 #include <vector>
 #include <grpc_client.h>
 #include <http_client.h>
-#include "json_utils.h"
 #include <rapidjson/document.h>
 #include <triton/common/model_config.h>
 #include <opencv2/core.hpp>
@@ -41,7 +40,7 @@ struct ClientConfig
     bool verbose;
 };
 
-bool ParseModelGrpc(
+inline bool ParseModelGrpc(
     const inference::ModelMetadataResponse &model_metadata,
     const inference::ModelConfigResponse &model_config, const size_t &batch_size,
     cpp_server::ModelConfig *model_info)
@@ -149,7 +148,7 @@ bool ParseModelGrpc(
     return true;
 }
 
-bool ParseModelHttp(
+inline bool ParseModelHttp(
     const rapidjson::Document &model_metadata,
     const rapidjson::Document &model_config, const size_t &batch_size,
     cpp_server::ModelConfig *model_info)

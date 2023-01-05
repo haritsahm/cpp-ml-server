@@ -36,7 +36,7 @@ namespace triton
     namespace client
     {
 
-        Error ParseJson(rapidjson::Document *document, const std::string &json_str)
+        inline Error ParseJson(rapidjson::Document *document, const std::string &json_str)
         {
             const unsigned int parseFlags = rapidjson::kParseNanAndInfFlag;
             document->Parse<parseFlags>(json_str.c_str(), json_str.size());
