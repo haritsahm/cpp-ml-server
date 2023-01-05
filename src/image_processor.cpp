@@ -1,5 +1,10 @@
 #include "cpp_server/image_processor.hpp"
 
+ImageProcessor::ImageProcessor(const cpp_server::ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size)
+{
+    infer_engine.reset(new cpp_server::TritonEngine(model_config, client_config, batch_size));
+}
+
 cpp_server::Error ImageProcessor::process(const rapidjson::Document &data, rapidjson::Document &result)
 {
     rapidjson::Pointer("/class").Set(result, "car");
@@ -26,6 +31,11 @@ cpp_server::Error ImageProcessor::process(const rapidjson::Document &data, rapid
         }
     }
     std::vector<uint8_t> array_uint8 = cpp_server::vectorT_to_blob<float>(array_float);
+
+    if (!infer_engine || !infer_engine->isOk())
+    {
+        return cpp_server::Error(cpp_server::Error::Code::INTERNAL, "Can't intialize inference system");
+    }
 
     // TODO: inference process
 

@@ -23,6 +23,7 @@ namespace cpp_server
 
         virtual Error process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results) = 0;
         bool isOk() { return status; }
+        ModelConfig modelConfig() { return model_config; }
 
     protected:
         ModelConfig model_config{};

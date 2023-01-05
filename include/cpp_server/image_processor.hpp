@@ -8,30 +8,27 @@
 #include <opencv2/imgcodecs.hpp>
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
-#include "common.hpp"
-#include "base64_decoder.hpp"
+#include "triton_engine.hpp"
+#include "triton_helper.hpp"
 #include "processor.hpp"
 #include "error.hpp"
-
-struct ImageModelInfo : cpp_server::ModelConfig
-{
-    // The shape of the input
-    int input_c_{3};
-    int input_h_{384};
-    int input_w_{384};
-
-};
+#include "common.hpp"
+#include "base64_decoder.hpp"
 
 class ImageProcessor : public Processor
 {
 public:
     ImageProcessor() = default;
-    ~ImageProcessor(){};
+    ImageProcessor(const cpp_server::ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
+    ~ImageProcessor()
+    {
+        infer_engine.reset(nullptr);
+    };
 
     ImageProcessor(const ImageProcessor &base) = delete;
     ImageProcessor &operator=(const ImageProcessor &server);
 
-    ImageProcessor(ImageProcessor &&server) = default;
+    ImageProcessor(ImageProcessor &&server) = delete;
     ImageProcessor &operator=(ImageProcessor &&server);
 
     cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result);

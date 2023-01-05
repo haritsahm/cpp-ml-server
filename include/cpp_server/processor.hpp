@@ -22,12 +22,12 @@ public:
     Processor(const Processor &processor) = delete;
     Processor &operator=(const Processor &processor);
 
-    Processor(Processor &&processor) = default;
+    Processor(Processor &&processor) = delete;
     Processor &operator=(Processor &&processor);
 
     virtual cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result) = 0;
 
-private:
+protected:
     std::unique_ptr<cpp_server::InferenceEngine> infer_engine;
 };
 
