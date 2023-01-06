@@ -49,6 +49,28 @@ namespace cpp_server
         explicit Error(Code code = Code::SUCCESS) : code_(code) {}
         explicit Error(Code code, const std::string &msg) : code_(code), msg_(msg) {}
 
+        ~Error(){};
+        Error(const Error &other)
+            : code_(other.code_), msg_(other.msg_) {};
+        Error &operator=(const Error &other){
+            if (this != &other)
+            {
+                code_ = other.code_;
+                msg_ = other.msg_;
+            }
+            return *this;
+        };
+        Error(Error &&other)
+            : code_(other.code_), msg_(other.msg_) {};
+        Error &operator=(Error &&other){
+            if (this != &other)
+            {
+                code_ = other.code_;
+                msg_ = other.msg_;
+            }
+            return *this;
+        };
+
         // Convenience "success" value. Can be used as Error::Success to
         // indicate no error.
         static const Error Success;
