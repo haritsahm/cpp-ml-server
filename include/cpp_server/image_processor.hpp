@@ -36,6 +36,7 @@ public:
 private:
     cpp_server::ModelConfig model_config;
     cpp_server::Error preprocess_data(const std::string &ss, cv::Mat &output);
+    void CHW2HWC(const cv::InputArray &src, cv::OutputArray &dst);
 };
 
 #endif
