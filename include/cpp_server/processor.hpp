@@ -7,12 +7,6 @@
 #include "error.hpp"
 #include "inference_engine.hpp"
 
-struct InferenceResponse
-{
-    std::string name;
-    float score;
-};
-
 class Processor
 {
 public:

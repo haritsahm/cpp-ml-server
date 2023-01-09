@@ -48,6 +48,13 @@ namespace cpp_server
         return result;
     }
 
+    struct ClassificationResult
+    {
+        std::string name;
+        int class_idx;
+        float score;
+    };
+
 };
 
 #endif
