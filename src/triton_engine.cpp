@@ -172,11 +172,14 @@ namespace cpp_server
         }
 
         size_t output_byte_size;
-        err = result->RawData(output_name, (const uint8_t **)&res.data[0], &output_byte_size);
+        // int32_t *buf_output_data;/
+        std::shared_ptr<int32_t> buf_ptr(new int32_t);
+        err = result->RawData(output_name, (const uint8_t **)&buf_ptr, &output_byte_size);
         if (!err.IsOk())
         {
             return Error(Error::Code::INTERNAL, "Unable to get data for output " + output_name);
         }
+        res.data = std::vector<uint8_t>(buf_ptr.get(), buf_ptr.get() + output_byte_size);
         return Error::Success;
     }
 
