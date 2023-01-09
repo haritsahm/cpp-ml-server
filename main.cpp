@@ -42,7 +42,13 @@ int main()
   auto server = asyik::make_http_server(as, "127.0.0.1", 8080);
   server->set_request_body_limit(10485760); // 10MB
 
-  ImageProcessor image_processor;
+  const int batch_size = 1;
+  cpp_server::ModelConfig model_config;
+  ClientConfig client_config;
+  client_config.model_name = "img_cls_efficientnetv2_static";
+  client_config.verbose = 1;
+
+  ImageProcessor image_processor(model_config, client_config, batch_size);
 
   rapidjson::Document payload_data, payload_result;
 
