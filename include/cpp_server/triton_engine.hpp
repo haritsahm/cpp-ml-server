@@ -4,6 +4,9 @@
 #include <string>
 #include <memory>
 #include <cstdint>
+#include <exception>
+#include <stdexcept>
+#include <iostream>
 #include <http_client.h>
 #include "json_utils.h"
 #include <rapidjson/document.h>

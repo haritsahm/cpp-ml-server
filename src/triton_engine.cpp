@@ -20,19 +20,23 @@ namespace cpp_server
         // TODO: Move to error code or status
         if (!tc_err.IsOk())
         {
+            std::cout << tc_err.Message() << std::endl;
             status = false;
         }
         Error p_err;
         p_err = readModelConfig();
-        if (!p_err.IsOk())
+        if (!tc_err.IsOk())
         {
+            std::cout << tc_err.Message() << std::endl;
             status = false;
         }
         p_err = initializeMemory();
-        if (!p_err.IsOk())
+        if (!tc_err.IsOk())
         {
+            std::cout << tc_err.Message() << std::endl;
             status = false;
         }
+        status = true;
     }
 
     Error TritonEngine::readModelConfig()
@@ -243,8 +247,20 @@ namespace cpp_server
         {
             InferenceResult<uint8_t> output_data;
             Error p_err;
-            p_err = postprocess(results[idx], output_data, batch_size, model_config.output_name_);
-            infer_results.push_back(output_data);
+            try
+            {
+                p_err = postprocess(results[idx], output_data, batch_size, model_config.output_name_);
+                if (!p_err.IsOk())
+                {
+                    return p_err;
+                }
+                infer_results.push_back(output_data);
+            }
+            catch (std::exception &e)
+            {
+                std::cout << e.what() << std::endl;
+                return Error(Error::Code::INTERNAL, "Unable to run postprocessing for " + model_config.output_name_);
+            }
         }
         return Error::Success;
     }
