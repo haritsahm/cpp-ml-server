@@ -61,7 +61,7 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
         cpp_server::ClassificationResult output_data;
         for (int i = 0; i < row_num; i++)
         {
-            int start_range = i * row_num, end_range = (i + 1) * row_num;
+            int start_range = i * col_num, end_range = (i + 1) * col_num;
             int maxElementIndex = std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range)) - (data_float.begin() + start_range);
             float maxElement = *std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range));
             output_data.class_idx = maxElementIndex;
