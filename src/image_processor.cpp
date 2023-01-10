@@ -56,11 +56,11 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
 {
 }
 
-cpp_server::Error ImageProcessor::process(const rapidjson::Document &data, rapidjson::Document &result)
+cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc)
 {
     cv::Mat preprocessed;
     cpp_server::Error p_err;
-    p_err = preprocess_data(data["image"].GetString(), preprocessed);
+    p_err = preprocess_data(data_doc["image"].GetString(), preprocessed);
     if (!p_err.IsOk())
     {
         return p_err;

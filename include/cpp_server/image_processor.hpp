@@ -34,7 +34,7 @@ public:
     ImageProcessor(ImageProcessor &&server) = delete;
     ImageProcessor &operator=(ImageProcessor &&server);
 
-    cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result);
+    cpp_server::Error process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc);
 
 private:
     cpp_server::ModelConfig model_config;

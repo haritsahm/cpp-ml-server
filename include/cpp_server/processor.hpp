@@ -19,7 +19,7 @@ public:
     Processor(Processor &&processor) = delete;
     Processor &operator=(Processor &&processor);
 
-    virtual cpp_server::Error process(const rapidjson::Document &data, rapidjson::Document &result) = 0;
+    virtual cpp_server::Error process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc) = 0;
 
 protected:
     std::unique_ptr<cpp_server::InferenceEngine> infer_engine;
