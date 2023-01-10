@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 project(cpp-server)
-SET(LIBASYIK_ENABLE_SOCI ON) # if SOCI database support is desired
+SET(LIBASYIK_ENABLE_SOCI OFF) # if SOCI database support is desired
 
 if(DEFINED ENV{CXX_VERSION})
     set(CMAKE_CXX_STANDARD $ENV{CXX_VERSION}) # set to 14 or 17 when available
 else()
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 find_package(libasyik REQUIRED)
