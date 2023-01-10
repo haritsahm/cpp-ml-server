@@ -54,6 +54,23 @@ cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, cv::Mat
 
 cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cpp_server::InferenceResult<uint8_t>> &infer_results, std::vector<cpp_server::ClassificationResult> &output)
 {
+    for (const cpp_server::InferenceResult<uint8_t> &result : infer_results)
+    {
+        std::vector<float> data_float(result.data.begin(), result.data.end());
+        int row_num = result.shape[0], col_num = result.shape[1];
+        cpp_server::ClassificationResult output_data;
+        for (int i = 0; i < row_num; i++)
+        {
+            int start_range = i * row_num, end_range = (i + 1) * row_num;
+            int maxElementIndex = std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range)) - (data_float.begin() + start_range);
+            float maxElement = *std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range));
+            output_data.class_idx = maxElementIndex;
+            output_data.score = maxElement;
+            output_data.name = "temp";
+        }
+        output.push_back(output_data);
+    }
+    return cpp_server::Error::Success;
 }
 
 cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc)
@@ -104,10 +121,18 @@ cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, r
 
     // TODO: postprocess
     std::vector<cpp_server::ClassificationResult> classification_output;
+    p_err = postprocess_classifaction(inference_results, classification_output);
+    if (!p_err.IsOk())
+    {
+        return p_err;
+    }
 
-    // TODO: return inference response
-    rapidjson::Pointer("/class").Set(result, "car");
-    rapidjson::Pointer("/score").Set(result, 0.001);
+    result_doc.Parse("{\"results\":[]}");
+    for (cpp_server::ClassificationResult &output : classification_output)
+    {
+        boost::format str_fmt = boost::format("{\"name\":%1%,\"score\":%2%,\"class\":%3%}") % output.name % output.score % output.class_idx;
+        rapidjson::SetValueByPointer(result_doc, "/results/-", str_fmt.str().c_str());
+    }
 
     return cpp_server::Error::Success;
 }
