@@ -130,8 +130,10 @@ cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, r
     result_doc.Parse("{\"results\":[]}");
     for (cpp_server::ClassificationResult &output : classification_output)
     {
-        boost::format str_fmt = boost::format("{\"name\":%1%,\"score\":%2%,\"class\":%3%}") % output.name % output.score % output.class_idx;
-        rapidjson::SetValueByPointer(result_doc, "/results/-", str_fmt.str().c_str());
+        rapidjson::Value obj(rapidjson::kObjectType);
+        obj.AddMember("score", output.score, result_doc.GetAllocator());
+        obj.AddMember("class", output.class_idx, result_doc.GetAllocator());
+        rapidjson::SetValueByPointer(result_doc, "/results/-", obj);
     }
 
     return cpp_server::Error::Success;
