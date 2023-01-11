@@ -48,6 +48,14 @@ namespace cpp_server
         return result;
     }
 
+    template <typename T>
+    static std::vector<T> blob_to_vectorT(const std::vector<unsigned char> &buffer)
+    {
+        std::vector<T> result(buffer.size() / sizeof(T));
+        memcpy(result.data(), buffer.data(), buffer.size());
+        return result;
+    }
+
     struct ClassificationResult
     {
         std::string name;

@@ -98,7 +98,7 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
 {
     for (const cpp_server::InferenceResult<uint8_t> &result : infer_results)
     {
-        std::vector<float> data_float(result.data.begin(), result.data.end());
+        std::vector<float> data_float = cpp_server::blob_to_vectorT<float>(result.data);
         int row_num = result.shape[0], col_num = result.shape[1];
         cpp_server::ClassificationResult output_data;
         for (int i = 0; i < row_num; i++)
@@ -108,7 +108,7 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
             apply_softmax(batch_output);
             int maxElementIndex = std::max_element(batch_output.begin(), batch_output.end()) - batch_output.begin();
             float maxElement = *std::max_element(batch_output.begin(), batch_output.end());
-            output_data.class_idx = maxElementIndex;
+            output_data.class_idx = maxElementIndex + 1; // zero index
             output_data.score = maxElement;
             output_data.name = "temp";
         }
@@ -144,14 +144,12 @@ cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, r
     inference_datas.push_back(input_data);
     std::vector<cpp_server::InferenceResult<uint8_t>> inference_results;
 
-    // TODO: inference process
     p_err = infer_engine->process(inference_datas, inference_results);
     if (!p_err.IsOk())
     {
         return p_err;
     }
 
-    // TODO: postprocess
     std::vector<cpp_server::ClassificationResult> classification_output;
     p_err = postprocess_classifaction(inference_results, classification_output);
     if (!p_err.IsOk())
