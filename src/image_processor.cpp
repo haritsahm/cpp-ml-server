@@ -2,7 +2,7 @@
 
 ImageProcessor::ImageProcessor(const ClientConfig &client_config, const int &batch_size)
 {
-    infer_engine.reset(new cpp_server::TritonEngine(model_config, client_config, batch_size));
+    infer_engine.reset(new cpp_server::TritonEngine(client_config, batch_size));
 }
 
 void ImageProcessor::apply_softmax(std::vector<float> &input)
@@ -37,8 +37,11 @@ cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, std::ve
     std::string decoded_string = base64_decode(ss);
     std::vector<uchar> data(decoded_string.begin(), decoded_string.end());
     std::vector<int> network_shape;
-    if (model_config.input_shape_.size() > 2)
-        network_shape = std::vector<int>{model_config.input_shape_.end() - std::min<int>(model_config.input_shape_.size(), 2), model_config.input_shape_.end()};
+    if (infer_engine->modelConfig().input_shape_.size() > 2)
+        network_shape = std::vector<int>{
+            infer_engine->modelConfig().input_shape_.end() - std::min<int>(infer_engine->modelConfig().input_shape_.size(), 2),
+            infer_engine->modelConfig().input_shape_.end()
+        };
     else
     {
         network_shape = std::vector<int>{384, 384};
