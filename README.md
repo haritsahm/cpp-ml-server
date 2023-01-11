@@ -14,14 +14,15 @@ docker build -t cpp-server:1.0.0 .
 
 ## Examples
 ```python
-import cv2
-import json
-from PIL import Image
-import requests
 import base64
-import numpy as np
+import json
 
-// Tree frog
+import cv2
+import numpy as np
+import requests
+from PIL import Image
+
+# Tree frog
 url = "https://github.com/EliSchwartz/imagenet-sample-images/blob/master/n01644373_tree_frog.JPEG?raw=true"
 
 image = np.array(Image.open(requests.get(url, stream=True).raw))
@@ -32,5 +33,6 @@ print(json.loads(response.text))
 ```
 
 ## TODO
+- [ ] Add detailed data validation steps
 - [ ] Support batched inputs
 - [ ] Support coupled inference process using onnxruntime
