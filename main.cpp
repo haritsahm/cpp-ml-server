@@ -50,12 +50,12 @@ int main()
 
   ImageProcessor image_processor(model_config, client_config, batch_size);
 
-  rapidjson::Document payload_data, payload_result;
-
   // accept string argument
-  server->on_http_request("/name/<string>", "POST", [&image_processor, &payload_data, &payload_result](auto req, auto args)
+  server->on_http_request("/classification/image", "POST", [&image_processor](auto req, auto args)
                           {
                             uint16_t r_errcode = 200;
+                            rapidjson::Document payload_data, payload_result;
+
                             r_errcode = validate_requests(req, payload_data);
                             if (r_errcode != 200)
                             {
@@ -66,6 +66,7 @@ int main()
                               cpp_server::Error proc_code = image_processor.process(payload_data, payload_result);
                               rapidjson::StringBuffer buffer; buffer.Clear();
                               rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                              writer.SetMaxDecimalPlaces(3);
                               payload_result.Accept(writer);
 
                               if (!proc_code.IsOk()) {
