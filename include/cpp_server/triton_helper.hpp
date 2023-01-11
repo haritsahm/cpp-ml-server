@@ -12,6 +12,8 @@
 
 namespace tc = triton::client;
 
+/// @brief TritonClient inference pointer
+/// Source: https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/examples/image_client.cc#L741
 union TritonClient
 {
     TritonClient()
@@ -24,12 +26,15 @@ union TritonClient
     std::unique_ptr<tc::InferenceServerGrpcClient> grpc_client_;
 };
 
+/// @brief TritonClient protocol type
+/// Source: https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/examples/image_client.cc#L67
 enum ProtocolType
 {
     HTTP = 0,
     GRPC = 1
 };
 
+/// @brief Configuration to access triton server.
 struct ClientConfig
 {
     std::string model_name;
@@ -40,6 +45,8 @@ struct ClientConfig
     bool verbose;
 };
 
+/// @brief Parse model configuration from grpc client.
+/// Source: https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/examples/image_client.cc#L410
 inline bool ParseModelGrpc(
     const inference::ModelMetadataResponse &model_metadata,
     const inference::ModelConfigResponse &model_config, const size_t &batch_size,
@@ -148,6 +155,8 @@ inline bool ParseModelGrpc(
     return true;
 }
 
+/// @brief Parse model configuration from http client.
+/// Source: https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/examples/image_client.cc#L536
 inline bool ParseModelHttp(
     const rapidjson::Document &model_metadata,
     const rapidjson::Document &model_config, const size_t &batch_size,
