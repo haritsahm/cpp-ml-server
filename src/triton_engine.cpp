@@ -171,7 +171,7 @@ namespace cpp_server
             return Error(Error::Code::INTERNAL, "Unable to get datatype for output " + output_name);
         }
 
-        std::shared_ptr<int32_t> buf_ptr(new int32_t);
+        std::shared_ptr<uint8_t> buf_ptr(new uint8_t);
         err = result->RawData(output_name, (const uint8_t **)&buf_ptr, &res.byte_size);
         if (!err.IsOk())
         {
