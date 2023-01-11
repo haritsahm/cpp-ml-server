@@ -43,12 +43,11 @@ int main()
   server->set_request_body_limit(10485760); // 10MB
 
   const int batch_size = 1;
-  cpp_server::ModelConfig model_config;
   ClientConfig client_config;
   client_config.model_name = "img_cls_efficientnetv2_static";
   client_config.verbose = 1;
 
-  ImageProcessor image_processor(model_config, client_config, batch_size);
+  ImageProcessor image_processor(client_config, batch_size);
 
   // accept string argument
   server->on_http_request("/classification/image", "POST", [&image_processor](auto req, auto args)

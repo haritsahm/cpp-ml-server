@@ -23,7 +23,7 @@ class ImageProcessor : public Processor
 {
 public:
     ImageProcessor() = default;
-    ImageProcessor(const cpp_server::ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
+    ImageProcessor(const ClientConfig &client_config, const int &batch_size);
     ~ImageProcessor()
     {
         infer_engine.reset(nullptr);

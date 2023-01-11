@@ -1,8 +1,7 @@
 #include "cpp_server/image_processor.hpp"
 
-ImageProcessor::ImageProcessor(const cpp_server::ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size)
+ImageProcessor::ImageProcessor(const ClientConfig &client_config, const int &batch_size)
 {
-    this->model_config = model_config;
     infer_engine.reset(new cpp_server::TritonEngine(model_config, client_config, batch_size));
 }
 
