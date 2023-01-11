@@ -6,7 +6,7 @@ ImageProcessor::ImageProcessor(const cpp_server::ModelConfig &model_config, cons
     infer_engine.reset(new cpp_server::TritonEngine(model_config, client_config, batch_size));
 }
 
-void ImageProcessor::CHW2HWC(const cv::InputArray &src, cv::OutputArray &dst)
+void ImageProcessor::HWC2CHW(const cv::InputArray &src, cv::OutputArray &dst)
 {
     const int src_h = src.rows();
     const int src_w = src.cols();
@@ -19,6 +19,34 @@ void ImageProcessor::CHW2HWC(const cv::InputArray &src, cv::OutputArray &dst)
     cv::Mat dst_1d = dst.getMat().reshape(1, {src_c, src_h, src_w});
 
     cv::transpose(hw_c, dst_1d);
+}
+
+void ImageProcessor::apply_softmax(std::vector<float> &input)
+{
+
+    int i;
+    float m, sum, constant;
+
+    m = -INFINITY;
+    for (i = 0; i < input.size(); ++i)
+    {
+        if (m < input[i])
+        {
+            m = input[i];
+        }
+    }
+
+    sum = 0.0;
+    for (i = 0; i < input.size(); ++i)
+    {
+        sum += exp(input[i] - m);
+    }
+
+    constant = m + log(sum);
+    for (i = 0; i < input.size(); ++i)
+    {
+        input[i] = exp(input[i] - constant);
+    }
 }
 
 cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, cv::Mat &output)
@@ -47,7 +75,7 @@ cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, cv::Mat
     image.convertTo(image, CV_32FC3);
     cv::subtract(cv::Scalar(0.485, 0.456, 0.406), image, image);
     cv::divide(0.226, image, image); // divide by average std per channel
-    CHW2HWC(image, output);
+    HWC2CHW(image, output);
 
     return cpp_server::Error::Success;
 }
@@ -62,8 +90,10 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
         for (int i = 0; i < row_num; i++)
         {
             int start_range = i * col_num, end_range = (i + 1) * col_num;
-            int maxElementIndex = std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range)) - (data_float.begin() + start_range);
-            float maxElement = *std::max_element((data_float.begin() + start_range), (data_float.begin() + end_range));
+            std::vector<float> batch_output((data_float.begin() + start_range), (data_float.begin() + end_range));
+            apply_softmax(batch_output);
+            int maxElementIndex = std::max_element(batch_output.begin(), batch_output.end()) - batch_output.begin();
+            float maxElement = *std::max_element(batch_output.begin(), batch_output.end());
             output_data.class_idx = maxElementIndex;
             output_data.score = maxElement;
             output_data.name = "temp";

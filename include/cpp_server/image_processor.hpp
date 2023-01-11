@@ -6,6 +6,7 @@
 #include <utility>
 #include <exception>
 #include <iostream>
+#include <math.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -40,7 +41,8 @@ private:
     cpp_server::ModelConfig model_config;
     cpp_server::Error preprocess_data(const std::string &ss, cv::Mat &output);
     cpp_server::Error postprocess_classifaction(const std::vector<cpp_server::InferenceResult<uint8_t>> &infer_results, std::vector<cpp_server::ClassificationResult> &output);
-    void CHW2HWC(const cv::InputArray &src, cv::OutputArray &dst);
+    void apply_softmax(std::vector<float> &input);
+    void HWC2CHW(const cv::InputArray &src, cv::OutputArray &dst);
 };
 
 #endif
