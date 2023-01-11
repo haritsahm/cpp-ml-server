@@ -44,7 +44,7 @@ int main()
 
   const int batch_size = 1;
   ClientConfig client_config;
-  client_config.model_name = "img_cls_efficientnetv2_static";
+  client_config.model_name = "imagenet_classification_static";
   client_config.verbose = 1;
 
   ImageProcessor image_processor(client_config, batch_size);
