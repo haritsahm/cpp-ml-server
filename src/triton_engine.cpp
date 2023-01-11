@@ -2,8 +2,8 @@
 
 namespace cpp_server
 {
-    TritonEngine::TritonEngine(const ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size)
-        : InferenceEngine(model_config, batch_size), client_config(client_config)
+    TritonEngine::TritonEngine(const ClientConfig &client_config, const int &batch_size)
+        : InferenceEngine(batch_size), client_config(client_config)
     {
 
         tc::Error tc_err;

@@ -21,7 +21,7 @@ namespace cpp_server
     {
     public:
         TritonEngine() = default;
-        TritonEngine(const ModelConfig &model_config, const ClientConfig &client_config, const int &batch_size);
+        TritonEngine(const ClientConfig &client_config, const int &batch_size);
         ~TritonEngine()
         {
             for (auto p : infer_inputs)

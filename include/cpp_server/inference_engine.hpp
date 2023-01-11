@@ -13,8 +13,8 @@ namespace cpp_server
     {
     public:
         InferenceEngine() = default;
-        InferenceEngine(const ModelConfig &config, const int &batch_size)
-            : model_config(config), batch_size(batch_size){};
+        InferenceEngine(const int &batch_size)
+            : batch_size(batch_size){};
         virtual ~InferenceEngine(){};
         InferenceEngine(const InferenceEngine &engine) = delete;
         InferenceEngine &operator=(InferenceEngine &engine);
