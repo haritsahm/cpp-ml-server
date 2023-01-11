@@ -6,7 +6,7 @@ This example also shows how to integrate [Triton Inference Server](https://githu
 
 ## Build
 ```
-docker build -t cpp-server:1.0.0 .
+docker build -t cpp-ml-server:1.0.0 .
 ```
 
 ## Run application
