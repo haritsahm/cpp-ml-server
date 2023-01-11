@@ -5,29 +5,13 @@ ImageProcessor::ImageProcessor(const ClientConfig &client_config, const int &bat
     infer_engine.reset(new cpp_server::TritonEngine(model_config, client_config, batch_size));
 }
 
-void ImageProcessor::HWC2CHW(const cv::InputArray &src, cv::OutputArray &dst)
-{
-    const int src_h = src.rows();
-    const int src_w = src.cols();
-    const int src_c = src.channels();
-
-    cv::Mat hw_c = src.getMat().reshape(1, src_h * src_w);
-
-    const std::array<int, 3> dims = {src_c, src_h, src_w};
-    dst.create(3, &dims[0], CV_MAKETYPE(src.depth(), 1));
-    cv::Mat dst_1d = dst.getMat().reshape(1, {src_c, src_h, src_w});
-
-    cv::transpose(hw_c, dst_1d);
-}
-
 void ImageProcessor::apply_softmax(std::vector<float> &input)
 {
-
-    int i;
-    float m, sum, constant;
+    // Source: https://codereview.stackexchange.com/a/180506
+    float m, sum;
 
     m = -INFINITY;
-    for (i = 0; i < input.size(); ++i)
+    for (int i = 0; i < input.size(); ++i)
     {
         if (m < input[i])
         {
@@ -36,13 +20,13 @@ void ImageProcessor::apply_softmax(std::vector<float> &input)
     }
 
     sum = 0.0;
-    for (i = 0; i < input.size(); ++i)
+    for (int i = 0; i < input.size(); ++i)
     {
         sum += exp(input[i] - m);
     }
 
-    constant = m + log(sum);
-    for (i = 0; i < input.size(); ++i)
+    const float constant = m + log(sum);
+    for (int i = 0; i < input.size(); ++i)
     {
         input[i] = exp(input[i] - constant);
     }
@@ -71,11 +55,11 @@ cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, std::ve
     {
         return cpp_server::Error(cpp_server::Error::Code::INVALID_DATA, "Input image is smaller than required output");
     }
+    // TODO: Fix Image normalization with Imagenet std and mean.
     image.convertTo(image, CV_32FC3, 1.f / 255);
     // cv::subtract(cv::Scalar(0.485, 0.456, 0.406), image, image);
     // cv::divide(0.226, image, image); // divide by average std per channel
     output.resize(image.channels() * image.rows * image.cols);
-    // HWC2CHW(image, output);
 
     // Store image to float as CHW
     for (int y = 0; y < image.rows; ++y)
