@@ -49,7 +49,7 @@ void ImageProcessor::apply_softmax(std::vector<float> &input)
     }
 }
 
-cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, cv::Mat &output)
+cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, std::vector<float> &output)
 {
     std::string decoded_string = base64_decode(ss);
     std::vector<uchar> data(decoded_string.begin(), decoded_string.end());
@@ -72,10 +72,24 @@ cpp_server::Error ImageProcessor::preprocess_data(const std::string &ss, cv::Mat
     {
         return cpp_server::Error(cpp_server::Error::Code::INVALID_DATA, "Input image is smaller than required output");
     }
-    image.convertTo(image, CV_32FC3);
-    cv::subtract(cv::Scalar(0.485, 0.456, 0.406), image, image);
-    cv::divide(0.226, image, image); // divide by average std per channel
-    HWC2CHW(image, output);
+    image.convertTo(image, CV_32FC3, 1.f / 255);
+    // cv::subtract(cv::Scalar(0.485, 0.456, 0.406), image, image);
+    // cv::divide(0.226, image, image); // divide by average std per channel
+    output.resize(image.channels() * image.rows * image.cols);
+    // HWC2CHW(image, output);
+
+    // Store image to float as CHW
+    for (int y = 0; y < image.rows; ++y)
+    {
+        for (int x = 0; x < image.cols; ++x)
+        {
+            for (int c = 0; c < image.channels(); ++c)
+            {
+                output[c * (image.rows * image.cols) + y * image.cols + x] =
+                    image.at<cv::Vec3f>(y, x)[c];
+            }
+        }
+    }
 
     return cpp_server::Error::Success;
 }
@@ -106,24 +120,12 @@ cpp_server::Error ImageProcessor::postprocess_classifaction(const std::vector<cp
 cpp_server::Error ImageProcessor::process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc)
 {
     cv::Mat preprocessed;
+    std::vector<float> array_float;
     cpp_server::Error p_err;
-    p_err = preprocess_data(data_doc["image"].GetString(), preprocessed);
+    p_err = preprocess_data(data_doc["image"].GetString(), array_float);
     if (!p_err.IsOk())
     {
         return p_err;
-    }
-    std::vector<float> array_float;
-    if (preprocessed.isContinuous())
-    {
-        // array.assign((float*)mat.datastart, (float*)mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
-        array_float.assign((float *)preprocessed.data, (float *)preprocessed.data + preprocessed.total() * preprocessed.channels());
-    }
-    else
-    {
-        for (int i = 0; i < preprocessed.rows; ++i)
-        {
-            array_float.insert(array_float.end(), preprocessed.ptr<float>(i), preprocessed.ptr<float>(i) + preprocessed.cols * preprocessed.channels());
-        }
     }
     std::vector<uint8_t> array_uint8 = cpp_server::vectorT_to_blob<float>(array_float);
 
