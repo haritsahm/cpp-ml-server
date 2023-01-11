@@ -4,13 +4,22 @@ This is an example to deploy image classification model using [libasyik](https:/
 
 This example also shows how to integrate [Triton Inference Server](https://github.com/triton-inference-server/server) using its [C++ API Client](https://github.com/triton-inference-server/client). We can coupled the web services with [onnxruntime](https://github.com/microsoft/onnxruntime) to process the incoming data inside the proces. But I want to try the decoupled method to split the model inference process and web services that accept incoming data using REST API.
 
-## Build Container
+## Build
 ```
 docker build -t cpp-server:1.0.0 .
 ```
 
 ## Run application
 
+1. Sync submodules that have the model configurations
+```
+git submodule update --init --recursive
+```
+
+2. Docker compose up
+```
+docker-compose up -d
+```
 
 ## Examples
 ```python
