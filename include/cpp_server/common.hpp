@@ -5,6 +5,7 @@
 
 namespace cpp_server
 {
+    /// @brief Struct to store model configuration from inference engine.
     struct ModelConfig
     {
         std::string input_name_{"input"};
@@ -20,6 +21,8 @@ namespace cpp_server
         bool channel_first_{true};
     };
 
+    /// @brief Struct to store inference input data to inference process.
+    /// @tparam T Type of inferece data.
     template <typename T>
     struct InferenceData
     {
@@ -29,6 +32,8 @@ namespace cpp_server
         std::vector<int> shape;
     };
 
+    /// @brief Struct to store inference result data from inference process.
+    /// @tparam T Type of inferece data.
     template <typename T>
     struct InferenceResult
     {
@@ -40,6 +45,18 @@ namespace cpp_server
         bool status;
     };
 
+    /// @brief Struct to store classification result.
+    struct ClassificationResult
+    {
+        std::string name;
+        int class_idx;
+        float score;
+    };
+
+    /// @brief Convert vector<T> to vector<uint8_t>
+    /// @tparam T Type of input data.
+    /// @param dataT vector of input data with type T.
+    /// @return vector of uint8_t
     template <typename T>
     static std::vector<unsigned char> vectorT_to_blob(std::vector<T> &dataT)
     {
@@ -48,6 +65,10 @@ namespace cpp_server
         return result;
     }
 
+    /// @brief Convert vector<uint8_t> to vector<T>
+    /// @tparam T Type of output data.
+    /// @param buffer input vector of input data.
+    /// @return vector of T.
     template <typename T>
     static std::vector<T> blob_to_vectorT(const std::vector<unsigned char> &buffer)
     {
@@ -55,14 +76,6 @@ namespace cpp_server
         memcpy(result.data(), buffer.data(), buffer.size());
         return result;
     }
-
-    struct ClassificationResult
-    {
-        std::string name;
-        int class_idx;
-        float score;
-    };
-
 };
 
 #endif
