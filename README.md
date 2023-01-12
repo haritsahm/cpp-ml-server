@@ -20,7 +20,13 @@ docker pull haritsahm/cpp-ml-server:1.0.0
 git submodule update --init --recursive
 ```
 
-2. Docker compose up
+3. Git LFS on submodule
+```
+// Just in case the model isn't downloadade
+cd triton-ml-server && git lfs pull && cd ..
+```
+
+4. Docker compose up
 ```
 docker-compose up -d
 ```
