@@ -1,0 +1,7 @@
+*
+!scripts/use_clang.sh
+!scripts/use_gcc.sh
+!src/
+!include/
+!CMakeLists.txt
+!main.cpp

@@ -1,0 +1,3 @@
+[submodule "triton-ml-server"]
+	path = triton-ml-server
+	url = https://github.com/haritsahm/triton-ml-server.git
