@@ -9,7 +9,7 @@ else()
 endif()
 
 find_package(libasyik REQUIRED)
-find_package(Boost COMPONENTS context fiber date_time REQUIRED)
+find_package(Boost COMPONENTS context fiber date_time url REQUIRED)
 find_package(RapidJSON REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(TritonCommon REQUIRED PATHS /usr/local/lib/cmake/TritonCommon)
@@ -53,7 +53,7 @@ endif()
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} Boost::fiber Boost::context Boost::date_time)
+    target_link_libraries(${PROJECT_NAME} Boost::fiber Boost::context Boost::date_time Boost::url)
 endif()
 
 if(OpenCV_FOUND)
