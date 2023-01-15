@@ -22,8 +22,10 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
     src/utils/error.cpp
+    src/utils/base64_decoder.cpp
     src/image_processor.cpp
     src/triton_engine.cpp
+    src/triton_helper.cpp
     main.cpp
 )
 
