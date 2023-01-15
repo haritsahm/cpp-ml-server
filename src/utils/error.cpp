@@ -24,57 +24,60 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "cpp_server/error.hpp"
+#include "cpp_server/utils/error.hpp"
 
 namespace cpp_server
 {
-    const Error Error::Success(Error::Code::SUCCESS);
-
-    std::string
-    Error::AsString() const
+    namespace utils
     {
-        std::string str(CodeString(code_));
-        str += ": " + msg_;
-        return str;
-    }
+        const Error Error::Success(Error::Code::SUCCESS);
 
-    const char *
-    Error::CodeString(const Code code)
-    {
-        switch (code)
+        std::string
+        Error::AsString() const
         {
-        case Error::Code::SUCCESS:
-            return "OK";
-        case Error::Code::UNKNOWN:
-            return "Unknown";
-        case Error::Code::INTERNAL:
-            return "Internal";
-        case Error::Code::INVALID_DATA:
-            return "INVALID_DATA";
-        case Error::Code::VALIDATION_ERROR:
-            return "VALIDATION_ERROR";
-        case Error::Code::INFERENCE_ERROR:
-            return "INFERENCE_ERROR";
-        case Error::Code::UNAVAILABLE:
-            return "Unavailable";
-        case Error::Code::UNSUPPORTED:
-            return "Unsupported";
-        case Error::Code::ALREADY_EXISTS:
-            return "Already exists";
-        default:
-            break;
+            std::string str(CodeString(code_));
+            str += ": " + msg_;
+            return str;
         }
 
-        return "<invalid code>";
-    }
-
-    std::ostream &
-    operator<<(std::ostream &out, const Error &err)
-    {
-        if (!err.msg_.empty())
+        const char *
+        Error::CodeString(const Code code)
         {
-            out << err.msg_;
+            switch (code)
+            {
+            case Error::Code::SUCCESS:
+                return "OK";
+            case Error::Code::UNKNOWN:
+                return "Unknown";
+            case Error::Code::INTERNAL:
+                return "Internal";
+            case Error::Code::INVALID_DATA:
+                return "INVALID_DATA";
+            case Error::Code::VALIDATION_ERROR:
+                return "VALIDATION_ERROR";
+            case Error::Code::INFERENCE_ERROR:
+                return "INFERENCE_ERROR";
+            case Error::Code::UNAVAILABLE:
+                return "Unavailable";
+            case Error::Code::UNSUPPORTED:
+                return "Unsupported";
+            case Error::Code::ALREADY_EXISTS:
+                return "Already exists";
+            default:
+                break;
+            }
+
+            return "<invalid code>";
         }
-        return out;
-    }
+
+        std::ostream &
+        operator<<(std::ostream &out, const Error &err)
+        {
+            if (!err.msg_.empty())
+            {
+                out << err.msg_;
+            }
+            return out;
+        }
+    };
 }; // namespace cpp_server

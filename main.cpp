@@ -8,7 +8,7 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
-#include "cpp_server/error.hpp"
+#include "cpp_server/utils/error.hpp"
 #include "cpp_server/image_processor.hpp"
 
 uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc)
@@ -43,11 +43,11 @@ int main()
   server->set_request_body_limit(10485760); // 10MB
 
   const int batch_size = 1;
-  ClientConfig client_config;
+  cpp_server::inferencer::ClientConfig client_config;
   client_config.model_name = "imagenet_classification_static";
   client_config.verbose = 1;
 
-  ImageProcessor image_processor(client_config, batch_size);
+  cpp_server::processor::ImageProcessor image_processor(client_config, batch_size);
 
   // accept string argument
   server->on_http_request("/classification/image", "POST", [&image_processor](auto req, auto args)
@@ -62,7 +62,7 @@ int main()
                             }
                             else
                             {
-                              cpp_server::Error proc_code = image_processor.process(payload_data, payload_result);
+                              cpp_server::utils::Error proc_code = image_processor.process(payload_data, payload_result);
                               rapidjson::StringBuffer buffer; buffer.Clear();
                               rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                               writer.SetMaxDecimalPlaces(3);
