@@ -10,10 +10,10 @@
 #include <http_client.h>
 #include "json_utils.h"
 #include <rapidjson/document.h>
-#include "inference_engine.hpp"
-#include "triton_helper.hpp"
+#include "base/inference_engine.hpp"
 #include "utils/common.hpp"
 #include "utils/error.hpp"
+#include "triton_helper.hpp"
 
 namespace cps_utils = cpp_server::utils;
 

@@ -14,7 +14,7 @@
 #include <rapidjson/pointer.h>
 #include "triton_engine.hpp"
 #include "triton_helper.hpp"
-#include "processor.hpp"
+#include "base/processor.hpp"
 #include "utils/error.hpp"
 #include "utils/common.hpp"
 #include "utils/base64_decoder.hpp"
