@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 #include <rapidjson/document.h>
-#include "utils/error.hpp"
 #include "inference_engine.hpp"
+#include "cpp_server/utils/error.hpp"
 
 namespace cps_utils = cpp_server::utils;
 namespace cps_inferencer = cpp_server::inferencer;

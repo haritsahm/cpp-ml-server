@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include "utils/common.hpp"
-#include "utils/error.hpp"
+#include "cpp_server/utils/common.hpp"
+#include "cpp_server/utils/error.hpp"
 
 namespace cps_utils = cpp_server::utils;
 
