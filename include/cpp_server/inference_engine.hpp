@@ -4,50 +4,55 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include "common.hpp"
-#include "error.hpp"
+#include "utils/common.hpp"
+#include "utils/error.hpp"
+
+namespace cps_utils = cpp_server::utils;
 
 namespace cpp_server
 {
-    /// @brief Abstract class for inference engine
-    class InferenceEngine
+    namespace inferencer
     {
-    public:
-        InferenceEngine() = default;
+        /// @brief Abstract class for inference engine
+        class InferenceEngine
+        {
+        public:
+            InferenceEngine() = default;
 
-        /// @brief Inference engine constructor from client config and desired batch size.
-        /// @param batch_size Desired processing batch size.
-        InferenceEngine(const int &batch_size)
-            : batch_size(batch_size){};
-        virtual ~InferenceEngine(){};
-        InferenceEngine(const InferenceEngine &engine) = delete;
-        InferenceEngine &operator=(InferenceEngine &engine);
-        InferenceEngine(InferenceEngine &&engine) = delete;
-        InferenceEngine &operator=(InferenceEngine &&engine);
+            /// @brief Inference engine constructor from client config and desired batch size.
+            /// @param batch_size Desired processing batch size.
+            InferenceEngine(const int &batch_size)
+                : batch_size(batch_size){};
+            virtual ~InferenceEngine(){};
+            InferenceEngine(const InferenceEngine &engine) = delete;
+            InferenceEngine &operator=(InferenceEngine &engine);
+            InferenceEngine(InferenceEngine &&engine) = delete;
+            InferenceEngine &operator=(InferenceEngine &&engine);
 
-        /// @brief Process data using inference engine.
-        /// @param infer_data vector of inference data.
-        /// @param infer_results vector of inference results.
-        /// @return Error code to validate process.
-        virtual Error process(const std::vector<InferenceData<uint8_t>> &infer_data, std::vector<InferenceResult<uint8_t>> &infer_results) = 0;
+            /// @brief Process data using inference engine.
+            /// @param infer_data vector of inference data.
+            /// @param infer_results vector of inference results.
+            /// @return cpp_server::utils::Error code to validate process.
+            virtual cps_utils::Error process(const std::vector<cps_utils::InferenceData<uint8_t>> &infer_data, std::vector<cps_utils::InferenceResult<uint8_t>> &infer_results) = 0;
 
-        /// @brief Check if the inference engine is valid.
-        /// @return boolean status.
-        bool isOk() { return status; }
+            /// @brief Check if the inference engine is valid.
+            /// @return boolean status.
+            bool isOk() { return status; }
 
-        /// @brief Get model configuration data from inference engine.
-        /// @return model configuration.
-        ModelConfig modelConfig() { return model_config; }
+            /// @brief Get model configuration data from inference engine.
+            /// @return model configuration.
+            cps_utils::ModelConfig modelConfig() { return model_config; }
 
-    protected:
-        /// @brief Model configuration data
-        ModelConfig model_config{};
+        protected:
+            /// @brief Model configuration data
+            cps_utils::ModelConfig model_config{};
 
-        /// @brief Desired batch size.
-        int batch_size{1};
+            /// @brief Desired batch size.
+            int batch_size{1};
 
-        /// @brief Inference engine status.
-        bool status{false};
+            /// @brief Inference engine status.
+            bool status{false};
+        };
     };
 };
 
