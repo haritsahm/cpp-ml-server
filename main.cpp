@@ -11,6 +11,9 @@
 #include "cpp_server/utils/error.hpp"
 #include "cpp_server/image_processor.hpp"
 
+namespace cps_processor = cpp_server::processor;
+namespace cps_utils = cpp_server::utils;
+
 uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc)
 {
 
@@ -47,10 +50,10 @@ int main()
   client_config.model_name = "imagenet_classification_static";
   client_config.verbose = 1;
 
-  cpp_server::processor::ImageProcessor image_processor(client_config, batch_size);
+  std::shared_ptr<cps_processor::ImageProcessor> image_processor = std::make_shared<cps_processor::ImageProcessor>(client_config, batch_size);
 
   // accept string argument
-  server->on_http_request("/classification/image", "POST", [&image_processor](auto req, auto args)
+  server->on_http_request("/classification/image", "POST", [image_processor](auto req, auto args)
                           {
                             uint16_t r_errcode = 200;
                             rapidjson::Document payload_data, payload_result;
@@ -62,7 +65,7 @@ int main()
                             }
                             else
                             {
-                              cpp_server::utils::Error proc_code = image_processor.process(payload_data, payload_result);
+                              cps_utils::Error proc_code = image_processor->process(payload_data, payload_result);
                               rapidjson::StringBuffer buffer; buffer.Clear();
                               rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                               writer.SetMaxDecimalPlaces(3);
