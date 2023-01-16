@@ -7,10 +7,10 @@ This example also shows how to integrate [Triton Inference Server](https://githu
 ## Build Docker
 ```
 // Build from Dockerfile
-docker build -t cpp-ml-server:1.1.1 .
+docker build -t cpp-ml-server:1.1.2 .
 
 // Pull from Docker Registry
-docker pull haritsahm/cpp-ml-server:1.1.1
+docker pull haritsahm/cpp-ml-server:1.1.2
 ```
 
 ## Run application
