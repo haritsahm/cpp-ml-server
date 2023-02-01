@@ -1,0 +1,15 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 5%
+    patch: off
+
+ignore:
+  - "/usr/include/**/*"        # ignore system lib
+  - "/usr/local/include/**/*"  # ignore 3rd parties
