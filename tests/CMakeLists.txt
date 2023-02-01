@@ -24,7 +24,18 @@ add_executable(test_rapid_json
 target_link_libraries(test_rapid_json
     PRIVATE
     GTest::GTest
-    common_utils)
+    common_utils
+)
+
+add_executable(test_base64
+    test_base64.cpp
+)
+target_link_libraries(test_rapid_json
+    PRIVATE
+    GTest::GTest
+    common_utils
+)
 
 add_test(NAME test_error_func COMMAND $<TARGET_FILE:test_error_func>)
 add_test(NAME test_rapid_json COMMAND $<TARGET_FILE:test_rapid_json>)
+add_test(NAME test_base64 COMMAND $<TARGET_FILE:test_rapitest_base64d_json>)
