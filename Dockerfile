@@ -83,7 +83,13 @@ WORKDIR /workspace/cpp_server/
 
 COPY include include/
 COPY src src/
+COPY tests tests/
 COPY main.cpp CMakeLists.txt ./
-RUN cmake . && make -j$(nproc)
+
+RUN mkdir build && cd build && \
+    cmake .. && \
+    make -j$(nproc)
+
+WORKDIR /workspace/cpp_server/build/
 
 CMD ["/bin/bash"]

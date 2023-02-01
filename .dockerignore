@@ -3,5 +3,6 @@
 !scripts/use_gcc.sh
 !src/
 !include/
+!tests/
 !CMakeLists.txt
 !main.cpp
