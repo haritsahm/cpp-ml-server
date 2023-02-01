@@ -100,7 +100,7 @@ namespace cpp_server
             Code code_;
             std::string msg_;
         };
-    };
-};
+    } // namespace utils
+} // namespace cpp_server
 
 #endif
