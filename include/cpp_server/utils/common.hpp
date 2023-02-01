@@ -61,7 +61,7 @@ namespace cpp_server
         /// @param dataT vector of input data with type T.
         /// @return vector of uint8_t
         template <typename T>
-        inline std::vector<unsigned char> vectorT_to_blob(std::vector<T> &dataT)
+        static std::vector<unsigned char> vectorT_to_blob(std::vector<T> &dataT)
         {
             const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&dataT[0]);
             std::vector<unsigned char> result(bytes, bytes + sizeof(T) * dataT.size());
@@ -73,7 +73,7 @@ namespace cpp_server
         /// @param buffer input vector of input data.
         /// @return vector of T.
         template <typename T>
-        inline std::vector<T> blob_to_vectorT(const std::vector<unsigned char> &buffer)
+        static std::vector<T> blob_to_vectorT(const std::vector<unsigned char> &buffer)
         {
             std::vector<T> result(buffer.size() / sizeof(T));
             memcpy(result.data(), buffer.data(), buffer.size());
