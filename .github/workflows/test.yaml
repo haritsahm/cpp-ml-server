@@ -19,7 +19,7 @@ jobs:
 
     - name: Run tests
       run: |
-        docker run -v ${PWD}/coverage:/mnt/coverage \
+        docker run -v ${PWD}/coverage:/mnt/coverage cpp-ml-server \
           /bin/bash -c "sh ../tests/run_tests.sh"
 
     - name: Generate reports
