@@ -107,5 +107,5 @@ namespace cpp_server
 
             return dec;
         }
-    }
-} // cpp_server
+    } // namespace utils
+} // namespace cpp_server

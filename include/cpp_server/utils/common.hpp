@@ -79,7 +79,7 @@ namespace cpp_server
             memcpy(result.data(), buffer.data(), buffer.size());
             return result;
         }
-    };
-};
+    } // namespace utils
+} // namespace cpp_server
 
 #endif
