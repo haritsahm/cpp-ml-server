@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 #include "cpp_server/utils/base64.hpp"
 
+using namespace cpp_server::utils;
+
 TEST(Base64, basic)
 {
     // Test all possibilites of fill bytes (none, one =, two ==)

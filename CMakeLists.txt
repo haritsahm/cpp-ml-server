@@ -49,7 +49,7 @@ include_directories(
 
 add_library(common_utils
     src/utils/error.cpp
-    src/utils/base64_decoder.cpp
+    src/utils/base64.cpp
 )
 
 add_library(image_processor

@@ -17,7 +17,7 @@
 #include "base/processor.hpp"
 #include "utils/error.hpp"
 #include "utils/common.hpp"
-#include "utils/base64_decoder.hpp"
+#include "utils/base64.hpp"
 
 namespace cps_utils = cpp_server::utils;
 namespace cps_inferencer = cpp_server::inferencer;
