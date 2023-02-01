@@ -79,5 +79,5 @@ namespace cpp_server
             }
             return out;
         }
-    };
-}; // namespace cpp_server
+    } // namespace utils
+} // namespace cpp_server
