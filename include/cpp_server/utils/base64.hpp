@@ -1,11 +1,11 @@
-// Base64 string decoder
+// Base64 string encoder-decoder
 // Source: https://stackoverflow.com/a/13935718
+// Source: http://www.sunshine2k.de/articles/coding/base64/understanding_base64.html
 
 #ifndef BASE64_DECODER_HPP
 #define BASE64_DECODER_HPP
 
 #include <string>
-#include <stdexcept>
 
 namespace cpp_server
 {

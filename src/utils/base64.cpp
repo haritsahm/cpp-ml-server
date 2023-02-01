@@ -1,4 +1,5 @@
 #include "cpp_server/utils/base64.hpp"
+#include <stdexcept>
 
 static const std::string base64_chars = {
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
