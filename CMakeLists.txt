@@ -7,6 +7,8 @@ else()
     set(CMAKE_CXX_STANDARD 14)
 endif()
 
+option(ENABLE_TRITON "Enable Triton Engine" ON)
+option(ENABLE_ONNXRT "Enable ONNXRT Engine" OFF)
 option(RUN_TESTS "Wether to run tests" OFF)
 
 if(RUN_TESTS)
@@ -38,10 +40,13 @@ set(LIBASYIK_ENABLE_SOCI OFF) # if SOCI database support is desired
 find_package(libasyik REQUIRED)
 find_package(Boost COMPONENTS context fiber date_time url REQUIRED)
 find_package(RapidJSON REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(TritonCommon REQUIRED PATHS /usr/local/lib/cmake/TritonCommon)
-find_package(TritonClient REQUIRED PATHS /usr/local/lib/cmake/TritonClient)
 find_package(OpenCV 4 REQUIRED)
+
+if(ENABLE_TRITON)
+    find_package(Protobuf REQUIRED)
+    find_package(TritonCommon REQUIRED PATHS /usr/local/lib/cmake/TritonCommon)
+    find_package(TritonClient REQUIRED PATHS /usr/local/lib/cmake/TritonClient)
+endif()
 
 include_directories(
     include
@@ -56,17 +61,25 @@ add_library(image_processor
     src/image_processor.cpp
 )
 
-add_library(inference_engines
-    src/triton_engine.cpp
-    src/triton_helper.cpp
-)
+if(ENABLE_TRITON)
+    add_library(inference_engines
+        src/triton_engine.cpp
+        src/triton_helper.cpp
+    )
+endif()
+
+if(ENABLE_ONNXRT)
+    add_library(inference_engines
+        src/onnxrt_helper.cpp
+    )
+endif()
 
 add_executable(${PROJECT_NAME}
     main.cpp
 )
 
 target_link_libraries(image_processor common_utils)
-target_link_libraries(${PROJECT_NAME} common_utils image_processor inference_engines)
+target_link_libraries(${PROJECT_NAME} common_utils image_processor)
 
 if(libasyik_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${libasyik_INCLUDE_DIR})
@@ -78,23 +91,6 @@ if(RapidJSON_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${RapidJSON_INCLUDE_DIRS})
     endif()
 
-if(Protobuf_FOUND)
-    target_include_directories(inference_engines PUBLIC ${Protobuf_INCLUDE_DIRS})
-    target_link_libraries(inference_engines ${Protobuf_LIBRARIES})
-endif()
-
-if(TritonClient_FOUND)
-    target_include_directories(image_processor PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
-    target_include_directories(inference_engines PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
-    target_link_libraries(image_processor TritonClient::httpclient TritonClient::grpcclient)
-    target_link_libraries(inference_engines TritonClient::httpclient TritonClient::grpcclient)
-endif()
-
-if(TritonCommon_FOUND)
-    target_include_directories(inference_engines PUBLIC ${TritonCommon_INCLUDE_DIR})
-    target_link_libraries(inference_engines TritonCommon::triton-common-model-config TritonCommon::triton-common-json)
-endif()
-
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} Boost::fiber Boost::context Boost::date_time Boost::url)
@@ -102,9 +98,7 @@ endif()
 
 if(OpenCV_FOUND)
     target_include_directories(image_processor PUBLIC ${OpenCV_INCLUDE_DIR})
-    target_include_directories(inference_engines PUBLIC ${OpenCV_INCLUDE_DIR})
     target_link_libraries(image_processor ${OpenCV_LIBS})
-    target_link_libraries(inference_engines ${OpenCV_LIBS})
 endif()
 
 find_package(Threads REQUIRED)
@@ -112,6 +106,37 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
+
+if(ENABLE_TRITON)
+    target_link_libraries(${PROJECT_NAME} inference_engines)
+
+    if(OpenCV_FOUND)
+        target_include_directories(inference_engines PUBLIC ${OpenCV_INCLUDE_DIR})
+        target_link_libraries(inference_engines ${OpenCV_LIBS})
+    endif()
+
+    if(Protobuf_FOUND)
+        target_include_directories(inference_engines PUBLIC ${Protobuf_INCLUDE_DIRS})
+        target_link_libraries(inference_engines ${Protobuf_LIBRARIES})
+    endif()
+
+    if(TritonClient_FOUND)
+        target_include_directories(image_processor PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
+        target_include_directories(inference_engines PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
+        target_link_libraries(image_processor TritonClient::httpclient TritonClient::grpcclient)
+        target_link_libraries(inference_engines TritonClient::httpclient TritonClient::grpcclient)
+    endif()
+
+    if(TritonCommon_FOUND)
+        target_include_directories(inference_engines PUBLIC ${TritonCommon_INCLUDE_DIR})
+        target_link_libraries(inference_engines TritonCommon::triton-common-model-config TritonCommon::triton-common-json)
+    endif()
+endif()
+
+if(ENABLE_ONNXRT)
+    target_include_directories(inference_engines PUBLIC /usr/local/include/onnxruntime)
+    target_link_libraries(inference_engines /usr/local/lib/libonnxruntime.so)
+endif()
 
 if(RUN_TESTS)
     enable_testing()
