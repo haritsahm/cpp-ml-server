@@ -12,8 +12,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
-#include "triton_engine.hpp"
-#include "triton_helper.hpp"
 #include "base/processor.hpp"
 #include "utils/error.hpp"
 #include "utils/common.hpp"
@@ -32,10 +30,8 @@ namespace cpp_server
         public:
             ImageProcessor() = default;
 
-            /// @brief Initialize class and use triton as its inference engine.
-            /// @param client_config Triton client configuration.
-            /// @param batch_size Batch size to process input data.
-            ImageProcessor(const cps_inferencer::ClientConfig &client_config, const int &batch_size);
+            ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine> &engine);
+
             ~ImageProcessor()
             {
                 infer_engine.reset(nullptr);

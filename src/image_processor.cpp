@@ -4,9 +4,9 @@ namespace cpp_server
 {
     namespace processor
     {
-        ImageProcessor::ImageProcessor(const cps_inferencer::ClientConfig &client_config, const int &batch_size)
+        ImageProcessor::ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine> &engine)
         {
-            infer_engine.reset(new cps_inferencer::TritonEngine(client_config, batch_size));
+            assignEngine(engine);
         }
 
         void ImageProcessor::apply_softmax(std::vector<float> &input)
