@@ -10,6 +10,8 @@
 #include <rapidjson/writer.h>
 #include "cpp_server/utils/error.hpp"
 #include "cpp_server/image_processor.hpp"
+#include "cpp_server/triton_helper.hpp"
+#include "cpp_server/triton_engine.hpp"
 
 namespace cps_processor = cpp_server::processor;
 namespace cps_utils = cpp_server::utils;
@@ -45,15 +47,16 @@ int main()
   auto server = asyik::make_http_server(as, "127.0.0.1", 8080);
   server->set_request_body_limit(10485760); // 10MB
 
-  const int batch_size = 1;
-  cpp_server::inferencer::ClientConfig client_config;
-  client_config.model_name = "imagenet_classification_static";
-  client_config.verbose = 1;
+  std::shared_ptr<cps_processor::ImageProcessor> image_processor;
+  {
+    const int batch_size = 1;
+    cpp_server::inferencer::ClientConfig client_config;
+    client_config.model_name = "imagenet_classification_static";
+    client_config.verbose = 1;
 
-  infer_engine.reset(new cps_inferencer::TritonEngine(client_config, batch_size));
-
-
-  std::shared_ptr<cps_processor::ImageProcessor> image_processor = std::make_shared<cps_processor::ImageProcessor>(client_config, batch_size);
+    std::unique_ptr<cps_inferencer::InferenceEngine> engine (new cps_inferencer::TritonEngine(client_config, batch_size));
+    image_processor.reset(new cps_processor::ImageProcessor(engine));
+  }
 
   // accept string argument
   server->on_http_request("/classification/image", "POST", [image_processor](auto req, auto args)
