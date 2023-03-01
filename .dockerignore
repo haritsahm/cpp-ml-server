@@ -4,5 +4,6 @@
 !src/
 !include/
 !tests/
+!examples/
 !CMakeLists.txt
 !main.cpp
