@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.18)
 
+set(LIBASYIK_ENABLE_SOCI OFF) # if SOCI database support is desired
+
 find_package(libasyik REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)

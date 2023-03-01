@@ -35,9 +35,6 @@ if(RUN_TESTS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
 endif()
 
-set(LIBASYIK_ENABLE_SOCI OFF) # if SOCI database support is desired
-
-find_package(libasyik REQUIRED)
 find_package(Boost COMPONENTS context fiber date_time url REQUIRED)
 find_package(RapidJSON REQUIRED)
 find_package(OpenCV 4 REQUIRED)
