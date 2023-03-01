@@ -36,6 +36,10 @@ namespace cpp_server
         protected:
             /// @brief Pointer to inference engine.
             std::unique_ptr<cps_inferencer::InferenceEngine> infer_engine;
+
+            void assignEngine(std::unique_ptr<cps_inferencer::InferenceEngine> &engine){
+                infer_engine = std::move(engine);
+            }
         };
     };
 };
