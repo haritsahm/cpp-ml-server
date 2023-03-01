@@ -1,6 +1,5 @@
 *
-!scripts/use_clang.sh
-!scripts/use_gcc.sh
+!scripts/cmake_build.sh
 !src/
 !include/
 !tests/
