@@ -25,22 +25,22 @@ namespace cpp_server
             if (!tc_err.IsOk())
             {
                 std::cout << tc_err.Message() << std::endl;
-                status = false;
+                this->status = false;
             }
             cps_utils::Error p_err;
             p_err = readModelConfig();
             if (!tc_err.IsOk())
             {
                 std::cout << tc_err.Message() << std::endl;
-                status = false;
+                this->status = false;
             }
             p_err = initializeMemory();
             if (!tc_err.IsOk())
             {
                 std::cout << tc_err.Message() << std::endl;
-                status = false;
+                this->status = false;
             }
-            status = true;
+            this->status = true;
         }
 
         template <typename T>
@@ -76,7 +76,7 @@ namespace cpp_server
                     return cps_utils::Error(cps_utils::Error::Code::INTERNAL, "Failed to parse triton model config");
                 }
                 if (!ParseModelHttp(
-                        model_metadata_json, model_config_json, batch_size, &model_config))
+                        model_metadata_json, model_config_json, this->batch_size, &model_config))
                 {
                     return cps_utils::Error(cps_utils::Error::Code::INTERNAL, "Failed to parse model configuration and metadata");
                 }
@@ -97,7 +97,7 @@ namespace cpp_server
                 {
                     return cps_utils::Error(cps_utils::Error::Code::INTERNAL, "Failed to get triton model config");
                 }
-                if (!ParseModelGrpc(model_metadata_response, model_config_response, batch_size, &model_config))
+                if (!ParseModelGrpc(model_metadata_response, model_config_response, this->batch_size, &model_config))
                 {
                     return cps_utils::Error(cps_utils::Error::Code::INTERNAL, "Failed to parse model configuration and metadata");
                 }
@@ -141,7 +141,7 @@ namespace cpp_server
         template <typename T>
         cps_utils::Error TritonEngine<T>::validate(const std::vector<cps_utils::InferenceData<uint8_t>> &data)
         {
-            if (data.size() != batch_size)
+            if (data.size() != this->batch_size)
             {
                 return cps_utils::Error(cps_utils::Error::Code::VALIDATION_ERROR, "Number of data is different from batch size.");
             }
@@ -216,7 +216,7 @@ namespace cpp_server
                 }
 
                 // Set input to be the next 'batch_size' images (preprocessed).
-                for (int idx = 0; idx < batch_size; ++idx)
+                for (int idx = 0; idx < this->batch_size; ++idx)
                 {
                     tc_err = input_ptr->AppendRaw(infer_data[data_idx].data);
                     if (!tc_err.IsOk())
@@ -259,7 +259,7 @@ namespace cpp_server
                 cps_utils::Error p_err;
                 try
                 {
-                    p_err = postprocess(results[idx], output_data, batch_size, model_config.output_name_);
+                    p_err = postprocess(results[idx], output_data, this->batch_size, model_config.output_name_);
                     if (!p_err.IsOk())
                     {
                         return p_err;
@@ -276,3 +276,8 @@ namespace cpp_server
         }
     };
 };
+
+//  https://isocpp.org/wiki/faq/templates#separate-template-class-defn-from-decl
+//  * NOTE: Solve template function linker problem
+
+template class cpp_server::inferencer::TritonEngine<float>;
