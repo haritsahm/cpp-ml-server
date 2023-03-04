@@ -63,7 +63,7 @@ namespace cpp_server
             const rapidjson::Document &model_metadata,
             const rapidjson::Document &model_config, const size_t &batch_size,
             cps_utils::ModelConfig *model_info);
-    };
-};
+    }
+}
 
 #endif
