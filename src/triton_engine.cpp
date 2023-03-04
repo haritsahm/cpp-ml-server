@@ -185,15 +185,30 @@ namespace cpp_server
             {
                 return cps_utils::Error(cps_utils::Error::Code::INTERNAL, "Unable to get data for output " + output_name);
             }
-            res.data = std::vector<uint8_t>(buf_ptr.get(), buf_ptr.get() + res.byte_size);
+            std::vector<uint8_t> uint8_blob_= std::vector<uint8_t>(buf_ptr.get(), buf_ptr.get() + res.byte_size);
+            res.data = cpp_server::utils::blob_to_vectorT<T>(uint8_blob_);
+
             return cps_utils::Error::Success;
         }
 
         template <typename T>
         cps_utils::Error TritonEngine<T>::process(const std::vector<cps_utils::InferenceData<T>> &infer_data, std::vector<cps_utils::InferenceResult<T>> &infer_results)
         {
+            std::vector<cps_utils::InferenceData<uint8_t>> input_uint8_;
+            for(auto &T_data: infer_data)
+            {
+                cpp_server::utils::InferenceData<uint8_t> tdata_;
+                std::vector<uint8_t> array_uint8 = cpp_server::utils::vectorT_to_blob<T>(T_data.data);
+                tdata_.data = array_uint8;
+
+                tdata_.name = T_data.name;
+                tdata_.data_dtype = T_data.data_dtype;
+                tdata_.shape = T_data.shape;
+                input_uint8_.push_back(tdata_);
+            }
+
             cps_utils::Error p_err;
-            p_err = validate(infer_data);
+            p_err = validate(input_uint8_);
             if (!p_err.IsOk())
             {
                 return p_err;
@@ -218,13 +233,13 @@ namespace cpp_server
                 // Set input to be the next 'batch_size' images (preprocessed).
                 for (int idx = 0; idx < this->batch_size; ++idx)
                 {
-                    tc_err = input_ptr->AppendRaw(infer_data[data_idx].data);
+                    tc_err = input_ptr->AppendRaw(input_uint8_[data_idx].data);
                     if (!tc_err.IsOk())
                     {
                         return cps_utils::Error(cps_utils::Error::Code::INFERENCE_ERROR, "Failed setting input");
                     }
 
-                    data_idx = (data_idx + 1) % infer_data.size();
+                    data_idx = (data_idx + 1) % input_uint8_.size();
                     if (data_idx == 0)
                     {
                         last_request = true;
@@ -255,7 +270,7 @@ namespace cpp_server
             // Post-process the results to make prediction(s)
             for (size_t idx = 0; idx < results.size(); idx++)
             {
-                cps_utils::InferenceResult<uint8_t> output_data;
+                cps_utils::InferenceResult<T> output_data;
                 cps_utils::Error p_err;
                 try
                 {
