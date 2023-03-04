@@ -14,6 +14,7 @@
 #include "cpp_server/triton_engine.hpp"
 
 namespace cps_processor = cpp_server::processor;
+namespace cps_inferencer = cpp_server::inferencer;
 namespace cps_utils = cpp_server::utils;
 
 uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc)
@@ -50,12 +51,12 @@ int main()
   std::shared_ptr<cps_processor::ImageProcessor> image_processor;
   {
     const int batch_size = 1;
-    cpp_server::inferencer::ClientConfig client_config;
+    cps_inferencer::ClientConfig client_config;
     client_config.model_name = "imagenet_classification_static";
     client_config.verbose = 1;
 
-    std::unique_ptr<cps_inferencer::InferenceEngine> engine (new cps_inferencer::TritonEngine(client_config, batch_size));
-    image_processor.reset(new cps_processor::ImageProcessor(engine));
+    std::unique_ptr<cps_inferencer::InferenceEngine<float>> engine_(new cps_inferencer::TritonEngine<float>(client_config, batch_size));
+    image_processor.reset(new cps_processor::ImageProcessor(engine_));
   }
 
   // accept string argument
