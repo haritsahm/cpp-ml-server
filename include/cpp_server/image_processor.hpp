@@ -13,6 +13,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
 #include "base/processor.hpp"
+#include "base/inference_engine.hpp"
 #include "utils/error.hpp"
 #include "utils/common.hpp"
 #include "utils/base64.hpp"
@@ -69,7 +70,7 @@ namespace cpp_server
             /// @param input vector of logits.
             void apply_softmax(std::vector<float> &input);
         };
-    };
-};
+    }
+}
 
 #endif
