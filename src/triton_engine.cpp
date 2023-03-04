@@ -4,9 +4,11 @@ namespace cpp_server
 {
     namespace inferencer
     {
-        TritonEngine::TritonEngine(const ClientConfig &client_config, const int &batch_size)
-            : InferenceEngine(batch_size), client_config(client_config)
+        template <typename T>
+        TritonEngine<T>::TritonEngine(const cpp_server::inferencer::ClientConfig &client_config, const int &batch_size)
+            : client_config(client_config)
         {
+            this->batch_size = batch_size;
 
             tc::Error tc_err;
             if (client_config.protocol == ProtocolType::HTTP)
@@ -41,7 +43,8 @@ namespace cpp_server
             status = true;
         }
 
-        cps_utils::Error TritonEngine::readModelConfig()
+        template <typename T>
+        cps_utils::Error TritonEngine<T>::readModelConfig()
         {
             tc::Error tc_err;
             if (client_config.protocol == ProtocolType::HTTP)
@@ -102,7 +105,8 @@ namespace cpp_server
             return cps_utils::Error::Success;
         }
 
-        cps_utils::Error TritonEngine::initializeMemory()
+        template <typename T>
+        cps_utils::Error TritonEngine<T>::initializeMemory()
         {
             // Initialize the inputs with the data.
             tc::InferInput *input;
@@ -134,7 +138,8 @@ namespace cpp_server
             return cps_utils::Error::Success;
         }
 
-        cps_utils::Error TritonEngine::validate(const std::vector<cps_utils::InferenceData<uint8_t>> &data)
+        template <typename T>
+        cps_utils::Error TritonEngine<T>::validate(const std::vector<cps_utils::InferenceData<uint8_t>> &data)
         {
             if (data.size() != batch_size)
             {
@@ -153,7 +158,8 @@ namespace cpp_server
             return cps_utils::Error::Success;
         }
 
-        cps_utils::Error TritonEngine::postprocess(const std::unique_ptr<tc::InferResult> &result, cps_utils::InferenceResult<uint8_t> &res, const size_t &batch_size, const std::string &output_name)
+        template <typename T>
+        cps_utils::Error TritonEngine<T>::postprocess(const std::unique_ptr<tc::InferResult> &result, cps_utils::InferenceResult<T> &res, const size_t &batch_size, const std::string &output_name)
         {
             if (!result->RequestStatus().IsOk())
             {
@@ -183,7 +189,8 @@ namespace cpp_server
             return cps_utils::Error::Success;
         }
 
-        cps_utils::Error TritonEngine::process(const std::vector<cps_utils::InferenceData<uint8_t>> &infer_data, std::vector<cps_utils::InferenceResult<uint8_t>> &infer_results)
+        template <typename T>
+        cps_utils::Error TritonEngine<T>::process(const std::vector<cps_utils::InferenceData<T>> &infer_data, std::vector<cps_utils::InferenceResult<T>> &infer_results)
         {
             cps_utils::Error p_err;
             p_err = validate(infer_data);

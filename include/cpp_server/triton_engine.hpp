@@ -22,7 +22,8 @@ namespace cpp_server
     namespace inferencer
     {
         /// @brief Inference engine using Triton Inference Client
-        class TritonEngine : public InferenceEngine
+        template <typename T>
+        class TritonEngine : public InferenceEngine<T>
         {
         public:
             TritonEngine() = default;
@@ -54,7 +55,7 @@ namespace cpp_server
             /// @param infer_data vector of inference data.
             /// @param infer_results vector of inference results.
             /// @return Error code to validate process.
-            cps_utils::Error process(const std::vector<cps_utils::InferenceData<uint8_t>> &infer_data, std::vector<cps_utils::InferenceResult<uint8_t>> &infer_results);
+            cps_utils::Error process(const std::vector<cps_utils::InferenceData<T>> &infer_data, std::vector<cps_utils::InferenceResult<T>> &infer_results);
 
         private:
             /// @brief Model metadata in json format
@@ -89,19 +90,19 @@ namespace cpp_server
             cps_utils::Error initializeMemory();
 
             /// @brief Validate inference data with confugration and buffer allocations.
-            /// @param infer_data vector of input data.
+            /// @param data vector of input data.
             /// @return Error code to validate process.
-            cps_utils::Error validate(const std::vector<cps_utils::InferenceData<uint8_t>> &infer_data);
+            cps_utils::Error validate(const std::vector<cps_utils::InferenceData<uint8_t>> &data);
             /// @brief Apply postprocessing to convert response from server to buffer outputs.
             /// @param result pointer to inference result.
             /// @param res Store buffer output.
             /// @param batch_size inference batch size.
             /// @param output_name output name.
             /// @return Error code to validate process.
-            cps_utils::Error postprocess(const std::unique_ptr<tc::InferResult> &result, cps_utils::InferenceResult<uint8_t> &res,
+            cps_utils::Error postprocess(const std::unique_ptr<tc::InferResult> &result, cps_utils::InferenceResult<T> &res,
                                          const size_t &batch_size, const std::string &output_name);
         };
-    };
-};
+    }
+}
 
 #endif
