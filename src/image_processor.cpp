@@ -4,9 +4,9 @@ namespace cpp_server
 {
     namespace processor
     {
-        ImageProcessor::ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine> &engine)
+        ImageProcessor::ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine<float>> &engine)
         {
-            assignEngine(engine);
+            infer_engine = std::move(engine);
         }
 
         void ImageProcessor::apply_softmax(std::vector<float> &input)
@@ -83,17 +83,16 @@ namespace cpp_server
             return cpp_server::utils::Error::Success;
         }
 
-        cpp_server::utils::Error ImageProcessor::postprocess_classifaction(const std::vector<cpp_server::utils::InferenceResult<uint8_t>> &infer_results, std::vector<cpp_server::utils::ClassificationResult> &output)
+        cpp_server::utils::Error ImageProcessor::postprocess_classifaction(const std::vector<cpp_server::utils::InferenceResult<float>> &infer_results, std::vector<cpp_server::utils::ClassificationResult> &output)
         {
-            for (const cpp_server::utils::InferenceResult<uint8_t> &result : infer_results)
+            for (const cpp_server::utils::InferenceResult<float> &result : infer_results)
             {
-                std::vector<float> data_float = cpp_server::utils::blob_to_vectorT<float>(result.data);
                 int row_num = result.shape[0], col_num = result.shape[1];
                 cpp_server::utils::ClassificationResult output_data;
                 for (int i = 0; i < row_num; i++)
                 {
                     int start_range = i * col_num, end_range = (i + 1) * col_num;
-                    std::vector<float> batch_output((data_float.begin() + start_range), (data_float.begin() + end_range));
+                    std::vector<float> batch_output((result.data.begin() + start_range), (result.data.begin() + end_range));
                     apply_softmax(batch_output);
                     int maxElementIndex = std::max_element(batch_output.begin(), batch_output.end()) - batch_output.begin();
                     float maxElement = *std::max_element(batch_output.begin(), batch_output.end());
@@ -108,6 +107,11 @@ namespace cpp_server
 
         cpp_server::utils::Error ImageProcessor::process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc)
         {
+            if (!infer_engine || !infer_engine->isOk())
+            {
+                return cpp_server::utils::Error(cpp_server::utils::Error::Code::INTERNAL, "Can't intialize inference system");
+            }
+
             cv::Mat preprocessed;
             std::vector<float> array_float;
             cpp_server::utils::Error p_err;
@@ -116,22 +120,17 @@ namespace cpp_server
             {
                 return p_err;
             }
-            std::vector<uint8_t> array_uint8 = cpp_server::utils::vectorT_to_blob<float>(array_float);
 
-            if (!infer_engine || !infer_engine->isOk())
-            {
-                return cpp_server::utils::Error(cpp_server::utils::Error::Code::INTERNAL, "Can't intialize inference system");
-            }
+            std::vector<cpp_server::utils::InferenceData<float>> inference_datas;
+            std::vector<cpp_server::utils::InferenceResult<float>> inference_results;
 
-            cpp_server::utils::InferenceData<uint8_t> input_data;
-            input_data.data = array_uint8;
+            cpp_server::utils::InferenceData<float> input_data;
+            input_data.data = array_float;
             input_data.name = "input";
             input_data.data_dtype = "FP32";
             input_data.shape = {preprocessed.size[0], preprocessed.size[1], preprocessed.size[2]};
 
-            std::vector<cpp_server::utils::InferenceData<uint8_t>> inference_datas;
             inference_datas.push_back(input_data);
-            std::vector<cpp_server::utils::InferenceResult<uint8_t>> inference_results;
 
             p_err = infer_engine->process(inference_datas, inference_results);
             if (!p_err.IsOk())

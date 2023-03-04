@@ -31,7 +31,7 @@ namespace cpp_server
         public:
             ImageProcessor() = default;
 
-            ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine> &engine);
+            ImageProcessor(std::unique_ptr<cps_inferencer::InferenceEngine<float>> &engine);
 
             ~ImageProcessor()
             {
@@ -51,6 +51,9 @@ namespace cpp_server
             cps_utils::Error process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc);
 
         private:
+            /// @brief Pointer to inference engine.
+            std::unique_ptr<cps_inferencer::InferenceEngine<float>> infer_engine;
+
             /// @brief Store model configuration from inference engine
             cps_utils::ModelConfig model_config;
 
@@ -64,7 +67,7 @@ namespace cpp_server
             /// @param infer_results Vector of inference results, especially if processed in batches.
             /// @param output Vector to store output classification data.
             /// @return Error code to validate process.
-            cps_utils::Error postprocess_classifaction(const std::vector<cps_utils::InferenceResult<uint8_t>> &infer_results, std::vector<cps_utils::ClassificationResult> &output);
+            cps_utils::Error postprocess_classifaction(const std::vector<cps_utils::InferenceResult<float>> &infer_results, std::vector<cps_utils::ClassificationResult> &output);
 
             /// @brief Apply softmax to raw logits data and modify inplace.
             /// @param input vector of logits.
