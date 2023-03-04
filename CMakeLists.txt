@@ -67,6 +67,7 @@ endif()
 
 if(ENABLE_ONNXRT)
     add_library(onnxrt_inference_engine
+        src/onnxrt_engine.cpp
         src/onnxrt_helper.cpp
     )
 endif()
@@ -95,9 +96,7 @@ if(ENABLE_TRITON)
     endif()
 
     if(TritonClient_FOUND)
-        target_include_directories(image_processor PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
         target_include_directories(triton_inference_engine PUBLIC ${TritonClient_INCLUDE_DIR} ${TritonCommon_INCLUDE_DIR})
-        target_link_libraries(image_processor TritonClient::httpclient TritonClient::grpcclient)
         target_link_libraries(triton_inference_engine TritonClient::httpclient TritonClient::grpcclient)
     endif()
 

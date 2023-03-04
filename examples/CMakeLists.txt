@@ -7,8 +7,7 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if(ENABLE_TRITON)
-    add_executable(
-        image_processing_triton
+    add_executable(image_processing_triton
         image_processing_triton.cpp
     )
 
@@ -17,7 +16,8 @@ if(ENABLE_TRITON)
         image_processor
         triton_inference_engine
         Threads::Threads
-        OpenSSL::SSL)
+        OpenSSL::SSL
+    )
 
     if(libasyik_FOUND)
         target_include_directories(image_processing_triton PUBLIC ${libasyik_INCLUDE_DIR})
@@ -32,6 +32,31 @@ if(ENABLE_TRITON)
         target_include_directories(image_processing_triton PUBLIC ${Boost_INCLUDE_DIR})
         target_link_libraries(image_processing_triton Boost::fiber Boost::context Boost::date_time Boost::url)
     endif()
+endif()
 
+if(ENABLE_ONNXRT)
+    add_executable(image_processing_onnxrt
+        image_processing_onnxrt.cpp
+    )
 
+    target_link_libraries(image_processing_onnxrt
+        common_utils
+        image_processor
+        onnxrt_inference_engine
+        Threads::Threads
+        OpenSSL::SSL
+    )
+    if(libasyik_FOUND)
+        target_include_directories(image_processing_onnxrt PUBLIC ${libasyik_INCLUDE_DIR})
+        target_link_libraries(image_processing_onnxrt libasyik)
+    endif()
+
+    if(RapidJSON_FOUND)
+        target_include_directories(image_processing_onnxrt PUBLIC ${RapidJSON_INCLUDE_DIRS})
+    endif()
+
+    if(Boost_FOUND)
+        target_include_directories(image_processing_onnxrt PUBLIC ${Boost_INCLUDE_DIR})
+        target_link_libraries(image_processing_onnxrt Boost::fiber Boost::context Boost::date_time Boost::url)
+    endif()
 endif()
