@@ -32,16 +32,8 @@ namespace cpp_server
             /// @param result_doc Output data stored as JSON format.
             /// @return Error code to validate process.
             virtual cps_utils::Error process(const rapidjson::Document &data_doc, rapidjson::Document &result_doc) = 0;
-
-        protected:
-            /// @brief Pointer to inference engine.
-            std::unique_ptr<cps_inferencer::InferenceEngine> infer_engine;
-
-            void assignEngine(std::unique_ptr<cps_inferencer::InferenceEngine> &engine){
-                infer_engine = std::move(engine);
-            }
         };
-    };
-};
+    }
+}
 
 #endif
