@@ -85,6 +85,11 @@ endif()
 
 if(ENABLE_TRITON)
 
+    target_link_libraries(triton_inference_engine
+        ${OpenCV_LIBS}
+        common_utils
+    )
+
     if(OpenCV_FOUND)
         target_include_directories(triton_inference_engine PUBLIC ${OpenCV_INCLUDE_DIR})
         target_link_libraries(triton_inference_engine ${OpenCV_LIBS})
@@ -108,7 +113,9 @@ endif()
 
 if(ENABLE_ONNXRT)
     target_include_directories(onnxrt_inference_engine PUBLIC /usr/local/include/onnxruntime)
-    target_link_libraries(onnxrt_inference_engine /usr/local/lib/libonnxruntime.so)
+    target_link_libraries(onnxrt_inference_engine
+        /usr/local/lib/libonnxruntime.so
+        common_utils)
 endif()
 
 add_subdirectory(examples)
