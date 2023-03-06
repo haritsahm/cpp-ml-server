@@ -85,22 +85,29 @@ namespace cpp_server
 
         cpp_server::utils::Error ImageProcessor::postprocess_classifaction(const std::vector<cpp_server::utils::InferenceResult<float>> &infer_results, std::vector<cpp_server::utils::ClassificationResult> &output)
         {
-            for (const cpp_server::utils::InferenceResult<float> &result : infer_results)
+            try
             {
-                int row_num = result.shape[0], col_num = result.shape[1];
-                cpp_server::utils::ClassificationResult output_data;
-                for (int i = 0; i < row_num; i++)
+                for (const cpp_server::utils::InferenceResult<float> &result : infer_results)
                 {
-                    int start_range = i * col_num, end_range = (i + 1) * col_num;
-                    std::vector<float> batch_output((result.data.begin() + start_range), (result.data.begin() + end_range));
-                    apply_softmax(batch_output);
-                    int maxElementIndex = std::max_element(batch_output.begin(), batch_output.end()) - batch_output.begin();
-                    float maxElement = *std::max_element(batch_output.begin(), batch_output.end());
-                    output_data.class_idx = maxElementIndex + 1; // zero index
-                    output_data.score = maxElement;
-                    output_data.name = "temp";
+                    int row_num = result.shape[0], col_num = result.shape[1];
+                    cpp_server::utils::ClassificationResult output_data;
+                    for (int i = 0; i < row_num; i++)
+                    {
+                        int start_range = i * col_num, end_range = (i + 1) * col_num;
+                        std::vector<float> batch_output((result.data.begin() + start_range), (result.data.begin() + end_range));
+                        apply_softmax(batch_output);
+                        int maxElementIndex = std::max_element(batch_output.begin(), batch_output.end()) - batch_output.begin();
+                        float maxElement = *std::max_element(batch_output.begin(), batch_output.end());
+                        output_data.class_idx = maxElementIndex + 1; // zero index
+                        output_data.score = maxElement;
+                        output_data.name = "temp";
+                    }
+                    output.push_back(output_data);
                 }
-                output.push_back(output_data);
+            }
+            catch (std::exception &ex)
+            {
+                return cps_utils::Error(cps_utils::Error::Code::INFERENCE_ERROR, ex.what());
             }
             return cpp_server::utils::Error::Success;
         }
@@ -112,7 +119,6 @@ namespace cpp_server
                 return cpp_server::utils::Error(cpp_server::utils::Error::Code::INTERNAL, "Can't intialize inference system");
             }
 
-            cv::Mat preprocessed;
             std::vector<float> array_float;
             cpp_server::utils::Error p_err;
             p_err = preprocess_data(data_doc["image"].GetString(), array_float);
@@ -124,13 +130,20 @@ namespace cpp_server
             std::vector<cpp_server::utils::InferenceData<float>> inference_datas;
             std::vector<cpp_server::utils::InferenceResult<float>> inference_results;
 
+            // ! NOTE: Change to move method
             cpp_server::utils::InferenceData<float> input_data;
-            input_data.data = array_float;
-            input_data.name = "input";
-            input_data.data_dtype = "FP32";
-            input_data.shape = {preprocessed.size[0], preprocessed.size[1], preprocessed.size[2]};
-
-            inference_datas.push_back(input_data);
+            try
+            {
+                input_data.data = array_float;
+                input_data.name = "input";
+                input_data.data_dtype = "FP32";
+                input_data.shape = infer_engine->modelConfig().input_shape_;
+                inference_datas.push_back(input_data);
+            }
+            catch (std::exception &ex)
+            {
+                return cps_utils::Error(cps_utils::Error::Code::INTERNAL, ex.what());
+            }
 
             p_err = infer_engine->process(inference_datas, inference_results);
             if (!p_err.IsOk())
