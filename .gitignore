@@ -30,4 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Custom
 cpp-server
+build/

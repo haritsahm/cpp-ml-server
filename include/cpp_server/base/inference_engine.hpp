@@ -14,15 +14,11 @@ namespace cpp_server
     namespace inferencer
     {
         /// @brief Abstract class for inference engine
+        template <typename T>
         class InferenceEngine
         {
         public:
             InferenceEngine() = default;
-
-            /// @brief Inference engine constructor from client config and desired batch size.
-            /// @param batch_size Desired processing batch size.
-            InferenceEngine(const int &batch_size)
-                : batch_size(batch_size){};
             virtual ~InferenceEngine(){};
             InferenceEngine(const InferenceEngine &engine) = delete;
             InferenceEngine &operator=(InferenceEngine &engine);
@@ -33,7 +29,7 @@ namespace cpp_server
             /// @param infer_data vector of inference data.
             /// @param infer_results vector of inference results.
             /// @return cpp_server::utils::Error code to validate process.
-            virtual cps_utils::Error process(const std::vector<cps_utils::InferenceData<uint8_t>> &infer_data, std::vector<cps_utils::InferenceResult<uint8_t>> &infer_results) = 0;
+            virtual cps_utils::Error process(const std::vector<cps_utils::InferenceData<T>> &infer_data, std::vector<cps_utils::InferenceResult<T>> &infer_results) = 0;
 
             /// @brief Check if the inference engine is valid.
             /// @return boolean status.
@@ -53,7 +49,7 @@ namespace cpp_server
             /// @brief Inference engine status.
             bool status{false};
         };
-    };
-};
+    }
+}
 
 #endif

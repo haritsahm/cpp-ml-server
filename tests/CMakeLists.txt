@@ -45,6 +45,22 @@ target_link_libraries(test_common
     common_utils
 )
 
+if(ENABLE_ONNXRT)
+    add_executable(test_orthelper
+        test_orthelper.cpp
+    )
+
+    target_link_libraries(test_orthelper
+        PRIVATE
+        GTest::GTest
+        common_utils
+        onnxrt_inference_engine
+    )
+
+    add_test(NAME test_orthelper COMMAND $<TARGET_FILE:test_orthelper>)
+
+endif(ENABLE_ONNXRT)
+
 add_test(NAME test_error_func COMMAND $<TARGET_FILE:test_error_func>)
 add_test(NAME test_rapid_json COMMAND $<TARGET_FILE:test_rapid_json>)
 add_test(NAME test_base64 COMMAND $<TARGET_FILE:test_base64>)
