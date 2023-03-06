@@ -4,7 +4,7 @@ namespace cpp_server
 {
     namespace inferencer
     {
-        ORTRunner::ORTRunner(const std::string &model_path, const std::vector<cps_utils::ModelConfig> &configs)
+        ORTRunner::ORTRunner(const std::string &model_path)
         {
             session_.reset(new Ort::Session(env_, model_path.c_str(), Ort::SessionOptions{nullptr}));
             model_configs = configs;

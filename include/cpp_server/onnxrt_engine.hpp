@@ -24,7 +24,7 @@ namespace cpp_server
             ONNXRTEngine() = default;
             ~ONNXRTEngine() {};
 
-            ONNXRTEngine(const std::string &model_path, const std::vector<cpp_server::utils::ModelConfig> &model_config, const int &batch_size);
+            ONNXRTEngine(const std::string &model_path, const int &batch_size);
 
             ONNXRTEngine(const ONNXRTEngine &engine) = delete;
             ONNXRTEngine &operator=(const ONNXRTEngine &engine);

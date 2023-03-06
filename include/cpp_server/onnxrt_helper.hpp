@@ -19,7 +19,7 @@ namespace cpp_server
         {
         public:
             ORTRunner() = default;
-            ORTRunner(const std::string &model_path, const std::vector<cps_utils::ModelConfig> &configs);
+            ORTRunner(const std::string &model_path);
             ~ORTRunner(){};
 
             cps_utils::Error process(const std::vector<Ort::Value> &input_tensors, std::vector<Ort::Value> &output_tensors);

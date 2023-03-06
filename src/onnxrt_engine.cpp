@@ -5,7 +5,7 @@ namespace cpp_server
     namespace inferencer
     {
         template <typename T>
-        ONNXRTEngine<T>::ONNXRTEngine(const std::string &model_path, const std::vector<cpp_server::utils::ModelConfig> &model_config, const int &batch_size)
+        ONNXRTEngine<T>::ONNXRTEngine(const std::string &model_path, const int &batch_size)
         {
             ort_runner.reset(new ORTRunner(model_path, model_config));
         }
