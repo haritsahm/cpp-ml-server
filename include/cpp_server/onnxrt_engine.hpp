@@ -1,13 +1,14 @@
 #ifndef ONNXRT_ENGINE_HPP
 #define ONNXRT_ENGINE_HPP
 
-#include <vector>
 #include <memory>
+#include <numeric>
+#include <vector>
 
 #include <rapidjson/document.h>
-#include "base/inference_engine.hpp"
 #include "utils/common.hpp"
 #include "utils/error.hpp"
+#include "base/inference_engine.hpp"
 #include "cpp_server/onnxrt_helper.hpp"
 
 
@@ -35,6 +36,8 @@ namespace cpp_server
 
         private:
             std::unique_ptr<ORTRunner> ort_runner;
+            std::vector<cps_utils::ModelConfig> model_configs;
+            std::vector<Ort::Value> input_tensors_, output_tensors_;
 
             cps_utils::Error validate(const std::vector<cps_utils::InferenceData<T>> &infer_data);
 
