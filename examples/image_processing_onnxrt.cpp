@@ -52,21 +52,8 @@ int main()
   {
     std::string model_path = "/model-repository/imagenet_classification_static/1/model.onnx";
     const int batch_size = 1;
-    std::vector<cpp_server::utils::ModelConfig> configs;
-    configs.push_back(cpp_server::utils::ModelConfig{
-        "input",
-        "output",
-        "FP32",
-        "FP32",
-        "FORMAT_NCHW",
-        std::vector<int64_t>{1,3,384,384},
-        std::vector<int64_t>{1,1000},
-        1769472,
-        4000,
-        1
-    });
 
-    std::unique_ptr<cps_inferencer::InferenceEngine<float>> engine_(new cps_inferencer::ONNXRTEngine<float>(model_path, configs, batch_size));
+    std::unique_ptr<cps_inferencer::InferenceEngine<float>> engine_(new cps_inferencer::ONNXRTEngine<float>(model_path, batch_size));
     image_processor.reset(new cps_processor::ImageProcessor(engine_));
   }
 
