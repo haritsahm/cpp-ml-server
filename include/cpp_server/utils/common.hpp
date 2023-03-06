@@ -1,13 +1,54 @@
 #ifndef COMMON_HELPER_HPP
 #define COMMON_HELPER_HPP
 
-#include <vector>
+#include <iostream>
+#include <map>
+#include <numeric>
 #include <string>
+#include <vector>
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+{
+    os << "[";
+    for (int i = 0; i < v.size(); ++i)
+    {
+        os << v[i];
+        if (i != v.size() - 1)
+        {
+            os << ", ";
+        }
+    }
+    os << "]";
+    return os;
+}
 
 namespace cpp_server
 {
     namespace utils
     {
+        static std::map<std::string, size_t> ElementStrTypeSize {
+            {"FP32", sizeof(float)},
+            {"UINT8", sizeof(uint8_t)},
+            {"INT8", sizeof(int8_t)},
+            {"UINT16", sizeof(uint16_t)},
+            {"INT16", sizeof(int16_t)},
+            {"INT32", sizeof(int32_t)},
+            {"INT64", sizeof(int64_t)},
+            {"BOOL", sizeof(bool)},
+            {"FP16", 2},
+            {"FP64", sizeof(double)},
+            {"UINT32", sizeof(uint32_t)},
+            {"UINT64", sizeof(uint64_t)},
+        };
+
+        template <typename T>
+        T vectorProduct(const std::vector<T>& v)
+        {
+            return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
+        }
+
+        // TODO: Replace with singular form node type
         /// @brief Struct to store model configuration from inference engine.
         struct ModelConfig
         {
@@ -32,7 +73,7 @@ namespace cpp_server
             std::vector<T> data;
             std::string name;
             std::string data_dtype;
-            std::vector<int> shape;
+            std::vector<int64_t> shape;
         };
 
         /// @brief Struct to store inference result data from inference process.
@@ -81,5 +122,19 @@ namespace cpp_server
         }
     } // namespace utils
 } // namespace cpp_server
+
+static std::ostream& operator<<(std::ostream& os, const cpp_server::utils::ModelConfig& m)
+{
+    os << "Input name: " <<  m.input_name_ << "\n";
+    os << "Input shape: " <<  m.input_shape_ << "\n";
+    os << "Input dtype: " <<  m.input_datatype_ << "\n";
+    os << "Input bytesize: " <<  m.input_byte_size_ << "\n";
+    os << "Output name: " << m.output_name_ << "\n";
+    os << "Output shape: " <<  m.output_shape_ << "\n";
+    os << "Output dtype: " <<  m.output_datatype_ << "\n";
+    os << "Output bytesize: " <<  m.output_byte_size_ << "\n";
+    os << "Max batch size: " << m.max_batch_size_;
+    return os;
+}
 
 #endif
