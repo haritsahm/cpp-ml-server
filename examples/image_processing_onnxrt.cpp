@@ -10,8 +10,11 @@
 #include <rapidjson/writer.h>
 #include "cpp_server/utils/error.hpp"
 #include "cpp_server/image_processor.hpp"
+#include "cpp_server/onnxrt_helper.hpp"
+#include "cpp_server/onnxrt_engine.hpp"
 
 namespace cps_processor = cpp_server::processor;
+namespace cps_inferencer = cpp_server::inferencer;
 namespace cps_utils = cpp_server::utils;
 
 uint16_t validate_requests(const auto &req_ptr, rapidjson::Document &doc)
@@ -45,12 +48,14 @@ int main()
   auto server = asyik::make_http_server(as, "127.0.0.1", 8080);
   server->set_request_body_limit(10485760); // 10MB
 
-  const int batch_size = 1;
-  cpp_server::inferencer::ClientConfig client_config;
-  client_config.model_name = "imagenet_classification_static";
-  client_config.verbose = 1;
+  std::shared_ptr<cps_processor::ImageProcessor> image_processor;
+  {
+    std::string model_path = "/model-repository/imagenet_classification_static/1/model.onnx";
+    const int batch_size = 1;
 
-  std::shared_ptr<cps_processor::ImageProcessor> image_processor = std::make_shared<cps_processor::ImageProcessor>(client_config, batch_size);
+    std::unique_ptr<cps_inferencer::InferenceEngine<float>> engine_(new cps_inferencer::ONNXRTEngine<float>(model_path, batch_size));
+    image_processor.reset(new cps_processor::ImageProcessor(engine_));
+  }
 
   // accept string argument
   server->on_http_request("/classification/image", "POST", [image_processor](auto req, auto args)

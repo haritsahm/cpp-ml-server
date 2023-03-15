@@ -1,0 +1,22 @@
+version: "2.4"
+services:
+  cpp-ml-server:
+    image: haritsahm/cpp-ml-server:1.2.0-tris
+    command: [ "./examples/image_processing_triton" ]
+    depends_on:
+      triton-inference-server:
+        condition: service_healthy
+
+  triton-inference-server:
+    container_name: triton-inference-server
+    image: nvcr.io/nvidia/tritonserver:22.06-py3
+    command: [ "tritonserver", "--model-repository=/model-repository" ]
+    shm_size: '1gb'
+    network_mode: "host"
+    volumes:
+      - ./triton-ml-server/model-repository:/model-repository
+    healthcheck:
+      test: [ "CMD", "curl", "localhost:8000/v2/health/ready" ]
+      interval: 1s
+      timeout: 10s
+      retries: 30
