@@ -15,6 +15,9 @@ namespace cpp_server
 {
     namespace inferencer
     {
+        /// @brief Get ONNX Element Type as a string
+        /// @param dtype int code from ONNXTensorElementDataType
+        /// @return Element type as a string.
         static std::string getONNXStrElementType(const int &dtype)
         {
             switch(dtype)
@@ -81,21 +84,35 @@ namespace cpp_server
         {
         public:
             ORTRunner() = default;
+            /// @brief Construct ONNXRuntime Runner based on model path
+            /// @param model_path path to onnx model.
             ORTRunner(const std::string &model_path);
             ~ORTRunner(){};
 
+            /// @brief read model configurations from onnx file.
             cps_utils::Error readModelConfigs();
+            /// @brief Get vector of model configurations.
             std::vector<cps_utils::ModelConfig> getModelConfigs() { return model_configs_;};
+            /// @brief Check if the session is valid.
             bool isValid() {bool val = session_ == nullptr ? false : true; return val;};
 
+            /// @brief Process data using inference engine.
+            /// @param input_tensors vector of input data in Ort Value.
+            /// @param output_tensors vector of output data in Ort Value.
+            /// @return Error code to validate process.
             cps_utils::Error process(const std::vector<Ort::Value> &input_tensors, std::vector<Ort::Value> &output_tensors);
 
         private:
+            /// @brief onnxruntime session handler.
             std::unique_ptr<Ort::Session> session_;
+            /// @brief onnxruntime environment.
             Ort::Env env_;
+            /// @brief onnxruntime run options.
             Ort::RunOptions run_options_;
 
+            /// @brief vector to store input and output names.
             std::vector<const char*> input_node_names_, output_node_names_;
+            /// @brief vector to store model configurations.
             std::vector<cps_utils::ModelConfig> model_configs_;
 
         };
