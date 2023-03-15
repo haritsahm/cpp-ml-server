@@ -2,9 +2,11 @@ version: "2.4"
 services:
   cpp-ml-server:
     container_name: cpp-ml-server
-    image: haritsahm/cpp-ml-server:1.1.2
+    image: haritsahm/cpp-ml-server:1.2.0
     command: [ "./cpp-server" ]
     network_mode: "host"
+    volumes:
+      - ./triton-ml-server/model-repository:/model-repository
     depends_on:
       triton-inference-server:
         condition: service_healthy

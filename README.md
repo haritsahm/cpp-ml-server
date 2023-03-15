@@ -7,10 +7,10 @@ This example also shows how to integrate [Triton Inference Server](https://githu
 ## Build Docker
 ```
 // Build from Dockerfile
-docker build -t cpp-ml-server:1.1.2 .
+docker build -t cpp-ml-server:1.2.0 .
 
 // Pull from Docker Registry
-docker pull haritsahm/cpp-ml-server:1.1.2
+docker pull haritsahm/cpp-ml-server:1.2.0
 ```
 
 ## Run application
@@ -28,6 +28,7 @@ cd triton-ml-server && git lfs pull && cd ..
 
 4. Docker compose up
 ```
+# Choose either to run the onnxrt engine or triton engine from the override commands
 docker-compose up -d
 ```
 
